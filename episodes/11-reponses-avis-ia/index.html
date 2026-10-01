@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le Figuier — Avis clients</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --ok: #1E7A42; --star: #E2A23B;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 32px 0 12px; }
+  header small { color: var(--brand-dark); font-weight: 600; letter-spacing: 1px; font-size: 12px; }
+  h1 { font: 600 28px Fraunces, serif; margin-top: 4px; }
+  header p { color: var(--muted); margin-top: 6px; font-size: 14px; }
+  .summary { display: flex; gap: 8px; margin: 12px 0 18px; }
+  .summary div { flex: 1; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; }
+  .summary b { display: block; font-size: 20px; }
+  .summary span { font-size: 12px; color: var(--muted); }
+
+  .review { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 16px; margin-bottom: 12px; }
+  .review.negative { border-left: 4px solid var(--brand); }
+  .who { display: flex; align-items: center; gap: 10px; }
+  .pic { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; color: #fff; flex-shrink: 0; }
+  .who b { font-size: 14px; display: block; }
+  .stars { color: var(--star); font-size: 13px; letter-spacing: 1px; }
+  .stars .off { color: #E5DCD4; }
+  .when { margin-left: auto; color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .text { font-size: 14px; line-height: 1.55; margin-top: 10px; }
+  .status { display: inline-block; margin-top: 12px; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; background: #FBEDE6; color: var(--brand-dark); }
+  .status.done { background: #E6F4EA; color: var(--ok); }
+
+  .draft { margin-top: 12px; background: var(--bg); border-radius: 14px; padding: 12px; }
+  .draft .label { font-size: 12px; font-weight: 600; color: var(--brand-dark); margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .draft textarea { width: 100%; min-height: 120px; border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; font: 14px/1.55 Inter, sans-serif; resize: vertical; background: #fff; color: var(--ink); }
+  .draft textarea:focus { outline: none; border-color: var(--brand); }
+  .row { display: flex; gap: 8px; margin-top: 10px; }
+  .btn { flex: 1; padding: 12px; border: 0; border-radius: 999px; background: var(--brand); color: #fff; font: 600 14px Inter, sans-serif; cursor: pointer; }
+  .btn:hover { background: var(--brand-dark); }
+  .btn.ghost { background: var(--card); color: var(--ink); border: 1.5px solid var(--line); flex: 0 0 auto; padding: 12px 16px; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .reply { margin-top: 12px; border-left: 3px solid var(--line); padding: 4px 0 4px 12px; font-size: 13px; line-height: 1.55; color: var(--muted); white-space: pre-wrap; animation: in .4s; }
+  .reply b { color: var(--ink); display: block; margin-bottom: 2px; }
+  @keyframes in { from { opacity: 0; transform: translateY(6px); } }
+  .caret::after { content: "▍"; animation: blink 1s steps(1) infinite; color: var(--brand); }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <small>RESTAURANT LE FIGUIER · ORAN</small>
+    <h1>Avis clients</h1>
+    <p>L'IA prépare la réponse. Vous relisez, vous validez, c'est publié.</p>
+  </header>
+
+  <div class="summary">
+    <div><b id="avg">—</b><span>note moyenne</span></div>
+    <div><b id="todo">—</b><span>sans réponse</span></div>
+    <div><b id="done">—</b><span>répondus</span></div>
+  </div>
+
+  <div id="reviews"></div>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Chaque nouvel avis arrive dans une liste « à répondre ».</li>
+      <li>L'IA écrit un brouillon : merci, le détail précis, et une solution si l'avis est négatif.</li>
+      <li>Vous relisez et corrigez si besoin. Rien ne part sans votre accord.</li>
+      <li>Un clic pour publier : tous vos avis ont une réponse, même les mauvais.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  // Adresse du petit serveur IA (outils/ia-worker). Vide = brouillons d'exemple, sans IA.
+  const AI_ENDPOINT = "";
+  const WHATSAPP = "+213 000 000 000";
+  const SIGNATURE = "Yacine, gérant du Figuier";
+
+  const REVIEWS = [
+    { auteur: "Leïla M.", note: 2, quand: "il y a 2 h", texte: "Les plats étaient bons mais nous avons attendu plus de 45 minutes pour être servis un vendredi soir. Personne ne nous a prévenus du retard." },
+    { auteur: "Rachid B.", note: 5, quand: "hier", texte: "Le meilleur couscous au poisson d'Oran ! Terrasse très agréable et service souriant. On reviendra en famille." },
+    { auteur: "Sophie D.", note: 4, quand: "il y a 3 jours", texte: "Très bon dîner, les desserts maison sont excellents. Un peu bruyant en salle, mieux vaut demander la terrasse." },
+    { auteur: "Amine T.", note: 1, quand: "il y a 5 jours", texte: "Livraison arrivée froide et il manquait une boisson. Déçu, d'habitude c'est bien." },
+  ];
+  const COLORS = ["#CF7652", "#6B8F71", "#5B6C8F", "#A9583A"];
+  const state = REVIEWS.map(() => ({ status: "todo", draft: "", reply: "" }));
+  const $ = (id) => document.getElementById(id);
+
+  // Brouillons d'exemple pour la démo sans serveur IA (avec le serveur, Claude écrit chaque réponse).
+  function demoDraft(r) {
+    const prenom = r.auteur.split(" ")[0];
+    const t = r.texte.toLowerCase();
+    if (r.note <= 2) {
+      const point = t.includes("attendu") ? "cette longue attente, et surtout de ne pas vous avoir prévenus"
+        : t.includes("livraison") ? "cette livraison arrivée froide et la boisson manquante"
+        : "cette expérience";
+      return `Bonjour ${prenom},\n\nMerci d'avoir pris le temps de nous écrire. Nous sommes sincèrement désolés pour ${point} : ce n'est pas l'accueil que nous voulons offrir. Votre retour a été partagé avec toute l'équipe.\nSi vous le souhaitez, écrivez-nous sur WhatsApp au ${WHATSAPP} pour en parler directement.\n\n${SIGNATURE}`;
+    }
+    if (r.note === 3 || r.note === 4) {
+      const plus = t.includes("dessert") ? "nos desserts maison vous aient plu" : "vous ayez passé un bon moment";
+      const tip = t.includes("bruyant") ? " Merci aussi pour le conseil de la terrasse : nous le proposerons plus souvent aux clients qui cherchent le calme." : "";
+      return `Bonjour ${prenom},\n\nMerci pour votre avis ! Nous sommes ravis que ${plus}.${tip}\nAu plaisir de vous revoir au Figuier.\n\n${SIGNATURE}`;
+    }
+    const plat = t.includes("couscous") ? "notre couscous au poisson" : "votre repas";
+    return `Bonjour ${prenom},\n\nQuel plaisir de lire ce message ! Toute l'équipe est très fière que ${plat} vous ait autant plu. La terrasse vous attend pour votre prochaine visite en famille.\n\n${SIGNATURE}`;
+  }
+
+  async function aiDraft(r) {
+    const res = await fetch(AI_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode: "avis", commerce: "le-figuier", avis: { auteur: r.auteur, note: r.note, texte: r.texte } }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.reponse) throw new Error(data.erreur || "Erreur");
+    return data.reponse;
+  }
+
+  // Effet « l'IA écrit » : le texte apparaît progressivement.
+  function typeInto(textarea, text) {
+    return new Promise((resolve) => {
+      let i = 0;
+      textarea.classList.add("caret");
+      const step = () => {
+        i = Math.min(text.length, i + 3);
+        textarea.value = text.slice(0, i);
+        textarea.scrollTop = textarea.scrollHeight;
+        if (i < text.length) setTimeout(step, 12);
+        else { textarea.classList.remove("caret"); resolve(); }
+      };
+      step();
+    });
+  }
+
+  function stars(n) {
+    return "★".repeat(n) + `<span class="off">${"★".repeat(5 - n)}</span>`;
+  }
+
+  function render() {
+    $("reviews").innerHTML = "";
+    REVIEWS.forEach((r, i) => {
+      const s = state[i];
+      const el = document.createElement("article");
+      el.className = "review" + (r.note <= 2 ? " negative" : "");
+      el.innerHTML = `
+        <div class="who">
+          <div class="pic" style="background:${COLORS[i % COLORS.length]}">${r.auteur[0]}</div>
+          <div><b></b><span class="stars" aria-label="${r.note} sur 5">${stars(r.note)}</span></div>
+          <span class="when">${r.quand}</span>
+        </div>
+        <p class="text"></p>`;
+      el.querySelector("b").textContent = r.auteur;
+      el.querySelector(".text").textContent = r.texte;
+
+      if (s.status === "todo") {
+        el.insertAdjacentHTML("beforeend", `<span class="status">Sans réponse</span><div class="row"><button class="btn">✨ Préparer une réponse</button></div>`);
+        el.querySelector(".btn").onclick = async (e) => {
+          e.target.disabled = true;
+          e.target.textContent = "L'IA écrit…";
+          let text;
+          try { text = AI_ENDPOINT ? await aiDraft(r) : demoDraft(r); } catch { text = demoDraft(r); }
+          s.status = "draft";
+          s.draft = text;
+          render();
+          const ta = document.querySelector(`[data-draft="${i}"]`);
+          await typeInto(ta, text);
+        };
+      } else if (s.status === "draft") {
+        el.insertAdjacentHTML("beforeend", `
+          <div class="draft">
+            <div class="label"><span>Brouillon à valider</span><span>modifiable</span></div>
+            <textarea data-draft="${i}" aria-label="Brouillon de réponse"></textarea>
+            <div class="row">
+              <button class="btn" data-ok>Approuver et publier</button>
+              <button class="btn ghost" data-redo aria-label="Proposer une autre version">↻</button>
+            </div>
+          </div>`);
+        const ta = el.querySelector("textarea");
+        ta.value = s.draft;
+        ta.oninput = () => (s.draft = ta.value);
+        el.querySelector("[data-ok]").onclick = () => {
+          s.reply = ta.value.trim();
+          if (!s.reply) return ta.focus();
+          s.status = "done";
+          navigator.clipboard?.writeText(s.reply).catch(() => {});
+          render();
+        };
+        el.querySelector("[data-redo]").onclick = () => { s.status = "todo"; render(); document.querySelectorAll(".review")[i].querySelector(".btn").click(); };
+      } else {
+        el.insertAdjacentHTML("beforeend", `<span class="status done">✓ Réponse publiée</span><div class="reply"><b>Réponse du propriétaire</b></div>`);
+        el.querySelector(".reply").append(s.reply);
+      }
+      $("reviews").append(el);
+    });
+
+    const avg = REVIEWS.reduce((t, r) => t + r.note, 0) / REVIEWS.length;
+    $("avg").textContent = avg.toLocaleString("fr-FR", { maximumFractionDigits: 1 }) + " ★";
+    $("todo").textContent = state.filter((s) => s.status !== "done").length;
+    $("done").textContent = state.filter((s) => s.status === "done").length;
+  }
+
+  render();
+</script>
+</body>
+</html>

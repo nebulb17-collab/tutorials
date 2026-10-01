@@ -1,0 +1,10 @@
+name = "automatise-ca-ia"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# Mettez ici l'adresse de vos sites (séparées par des virgules). "*" = tout le monde (démo seulement).
+ALLOWED_ORIGINS = "http://localhost:8000"
+
+# La clé API ne va jamais ici : npx wrangler secret put ANTHROPIC_API_KEY

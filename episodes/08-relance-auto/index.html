@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relance automatique</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --ok: #1E7A42; --blue: #2F5E8C;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 32px 0 12px; }
+  header small { color: var(--brand-dark); font-weight: 600; letter-spacing: 1px; font-size: 12px; }
+  h1 { font: 600 28px Fraunces, serif; margin-top: 4px; }
+  header p { color: var(--muted); margin-top: 6px; font-size: 14px; }
+
+  .daybar { position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 12px 0; display: flex; align-items: center; gap: 12px; }
+  .daybox { background: var(--ink); color: #fff; border-radius: 14px; padding: 8px 14px; text-align: center; }
+  .daybox small { display: block; font-size: 11px; opacity: .7; }
+  .daybox b { font: 600 22px Fraunces, serif; }
+  .daybar button { flex: 1; padding: 14px; border: 0; border-radius: 999px; background: var(--brand); color: #fff; font: 600 15px Inter, sans-serif; cursor: pointer; }
+  .daybar button.reset { flex: 0; background: var(--card); color: var(--ink); border: 1.5px solid var(--line); padding: 14px 16px; }
+
+  .lead { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px; margin-bottom: 10px; transition: border-color .3s; }
+  .lead.flash { border-color: var(--brand); box-shadow: 0 0 0 4px #CF765226; }
+  .lead .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .lead strong { font-size: 15px; }
+  .lead .meta { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .badge { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+  .b-new { background: #FBEDE6; color: var(--brand-dark); }
+  .b-replied { background: #E6F4EA; color: var(--ok); }
+  .b-followed { background: #E3ECF6; color: var(--blue); }
+  .lead .wait { margin-top: 10px; height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; }
+  .lead .wait i { display: block; height: 100%; background: var(--brand); transition: width .5s; }
+  .lead .mark { margin-top: 10px; background: none; border: 0; color: var(--muted); font-size: 12px; text-decoration: underline; cursor: pointer; }
+  .bubble { margin-top: 12px; background: #E7F8EC; border-radius: 14px 14px 4px 14px; padding: 12px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; animation: in .5s; }
+  .bubble small { display: block; color: var(--muted); font-size: 11px; margin-bottom: 4px; }
+  @keyframes in { from { transform: translateY(8px); opacity: 0; } }
+
+  h2 { font: 600 19px Fraunces, serif; margin: 28px 0 10px; }
+  textarea { width: 100%; min-height: 130px; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line); font: inherit; font-size: 14px; line-height: 1.5; resize: vertical; }
+  textarea:focus { outline: none; border-color: var(--brand); }
+  .hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <small>RÉNOV' EXPRESS · PROSPECTS</small>
+    <h1>Plus jamais de relance oubliée</h1>
+    <p>Sans réponse depuis 2 jours ? Le message de relance part tout seul.</p>
+  </header>
+
+  <div class="daybar">
+    <div class="daybox"><small>Jour</small><b id="day">0</b></div>
+    <button id="next">⏩ Jour suivant</button>
+    <button class="reset" id="reset" aria-label="Recommencer">↺</button>
+  </div>
+
+  <div id="leads"></div>
+
+  <h2>Le message de relance</h2>
+  <textarea id="template">Bonjour {prénom},
+
+Je me permets de revenir vers vous au sujet de votre projet ({projet}).
+Avez-vous eu le temps d'y réfléchir ? Je peux passer voir le chantier cette semaine, sans engagement.
+
+Belle journée,
+Rénov' Express</textarea>
+  <p class="hint">{prénom} et {projet} sont remplacés automatiquement pour chaque prospect.</p>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Tous vos prospects sont dans un tableau, avec un statut : Nouveau, Répondu, Relancé.</li>
+      <li>Quand quelqu'un vous répond, passez-le en « Répondu ».</li>
+      <li>Chaque matin, le script repère ceux qui sont « Nouveau » depuis 2 jours.</li>
+      <li>Il leur envoie une relance polie, une seule fois, et note la date.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  const DELAY = 2;
+  const $ = (id) => document.getElementById(id);
+  const INITIAL = [
+    { nom: "Karim Ouali", projet: "salle de bain", depuis: 0, statut: "Nouveau" },
+    { nom: "Samia Larbi", projet: "cuisine", depuis: 1, statut: "Nouveau" },
+    { nom: "Mehdi Saïdi", projet: "peinture", depuis: 1, statut: "Répondu" },
+  ];
+  let day = 0, leads = [];
+
+  function reset() {
+    day = 0;
+    leads = INITIAL.map((l) => ({ ...l, message: null }));
+    render();
+  }
+
+  function fill(lead) {
+    return $("template").value.replaceAll("{prénom}", lead.nom.split(" ")[0]).replaceAll("{projet}", lead.projet);
+  }
+
+  function render(flashIndex = -1) {
+    $("day").textContent = day;
+    $("leads").innerHTML = "";
+    leads.forEach((l, i) => {
+      const waited = day + l.depuis;
+      const badge = { "Nouveau": "b-new", "Répondu": "b-replied", "Relancé": "b-followed" }[l.statut];
+      const el = document.createElement("div");
+      el.className = "lead" + (i === flashIndex ? " flash" : "");
+      el.innerHTML = `
+        <div class="top"><strong></strong><span class="badge ${badge}">${l.statut}</span></div>
+        <div class="meta"></div>`;
+      el.querySelector("strong").textContent = l.nom;
+      el.querySelector(".meta").textContent = `Devis ${l.projet} · sans réponse depuis ${waited} jour${waited > 1 ? "s" : ""}`;
+      if (l.statut === "Nouveau") {
+        el.insertAdjacentHTML("beforeend", `<div class="wait"><i style="width:${Math.min(100, (waited / DELAY) * 100)}%"></i></div>
+          <button class="mark">Il m'a répondu → marquer « Répondu »</button>`);
+        el.querySelector(".mark").onclick = () => { l.statut = "Répondu"; render(); };
+      }
+      if (l.statut === "Répondu") el.querySelector(".meta").textContent = `Devis ${l.projet} · a répondu, pas de relance`;
+      if (l.message) {
+        const b = document.createElement("div");
+        b.className = "bubble";
+        b.innerHTML = `<small>Relance automatique · jour ${l.relanceJour}, 10h00</small>`;
+        b.append(l.message);
+        el.append(b);
+      }
+      $("leads").append(el);
+    });
+  }
+
+  $("next").onclick = () => {
+    day++;
+    let flashed = -1;
+    leads.forEach((l, i) => {
+      if (l.statut === "Nouveau" && day + l.depuis >= DELAY) {
+        l.statut = "Relancé";
+        l.message = fill(l);
+        l.relanceJour = day;
+        flashed = i;
+      }
+    });
+    render(flashed);
+  };
+  $("reset").onclick = reset;
+  reset();
+</script>
+</body>
+</html>

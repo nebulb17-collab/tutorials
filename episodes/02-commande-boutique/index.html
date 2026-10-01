@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boutique Atlas — Commande</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --wa-bg: #E7F8EC;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 0 16px 48px; }
+  .brand { text-align: center; font: 600 20px Fraunces, serif; padding: 20px 0; letter-spacing: .5px; }
+  .photo { aspect-ratio: 1; border-radius: 20px; display: grid; place-items: center; font-size: 120px;
+    background: linear-gradient(135deg, #F3E1D4, #E9C9B4); transition: filter .3s; }
+  h1 { font: 600 26px Fraunces, serif; margin-top: 18px; }
+  .price { color: var(--brand-dark); font-weight: 600; font-size: 20px; margin: 4px 0 18px; }
+  label, .label { display: block; font-size: 13px; font-weight: 600; margin: 16px 0 8px; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chips input { position: absolute; opacity: 0; pointer-events: none; }
+  .chips span { display: inline-block; border: 1.5px solid var(--line); background: var(--card); border-radius: 12px;
+    padding: 10px 14px; font-size: 14px; cursor: pointer; }
+  .chips input:checked + span { border-color: var(--brand); background: var(--brand); color: #fff; }
+  .chips input:focus-visible + span { outline: 2px solid var(--brand-dark); outline-offset: 2px; }
+  .swatch { width: 14px; height: 14px; border-radius: 50%; display: inline-block; vertical-align: -2px; margin-right: 6px; border: 1px solid #0002; }
+  .qty { display: flex; align-items: center; gap: 12px; }
+  .qty button { width: 40px; height: 40px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card); font-size: 20px; cursor: pointer; }
+  .qty output { font-weight: 600; min-width: 24px; text-align: center; }
+  input[type=text], input[type=tel], textarea { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line);
+    background: var(--card); font: inherit; font-size: 15px; }
+  input:focus, textarea:focus { outline: none; border-color: var(--brand); }
+  textarea { resize: vertical; min-height: 70px; }
+  .preview { margin-top: 24px; background: var(--wa-bg); border-radius: 16px; padding: 14px; }
+  .preview .label { margin: 0 0 8px; color: #1E7A42; }
+  .preview pre { white-space: pre-wrap; font: 14px/1.5 Inter, sans-serif; background: #fff; border-radius: 10px 10px 10px 2px; padding: 12px; }
+  .send { width: 100%; margin-top: 18px; padding: 16px; border: 0; border-radius: 999px; background: var(--brand);
+    color: #fff; font: 600 16px Inter, sans-serif; cursor: pointer; }
+  .send:hover { background: var(--brand-dark); }
+  .error { color: #B3261E; font-size: 13px; margin-top: 8px; min-height: 18px; }
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">BOUTIQUE ATLAS</div>
+  <div class="photo" id="photo" aria-hidden="true">👗</div>
+  <h1>Robe Kaftan Sahara</h1>
+  <div class="price">4 900 DA</div>
+
+  <form id="form" novalidate>
+    <span class="label">Taille</span>
+    <div class="chips" id="sizes"></div>
+
+    <span class="label">Couleur</span>
+    <div class="chips" id="colors"></div>
+
+    <span class="label">Quantité</span>
+    <div class="qty">
+      <button type="button" id="minus" aria-label="Moins">−</button>
+      <output id="qty">1</output>
+      <button type="button" id="plus" aria-label="Plus">+</button>
+    </div>
+
+    <label for="name">Nom complet</label>
+    <input type="text" id="name" autocomplete="name" placeholder="Ex. Amina Benali">
+
+    <label for="phone">Téléphone</label>
+    <input type="tel" id="phone" autocomplete="tel" placeholder="Ex. 0550 00 00 00">
+
+    <label for="address">Adresse de livraison</label>
+    <textarea id="address" autocomplete="street-address" placeholder="Rue, quartier, ville"></textarea>
+
+    <div class="preview" aria-live="polite">
+      <span class="label">Aperçu du message WhatsApp</span>
+      <pre id="preview"></pre>
+    </div>
+
+    <p class="error" id="error"></p>
+    <button class="send" type="submit">Envoyer ma commande sur WhatsApp</button>
+  </form>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Ajoutez les choix sur la fiche produit : taille, couleur, quantité.</li>
+      <li>Ajoutez nom, téléphone et adresse de livraison.</li>
+      <li>Assemblez toutes les réponses en un seul message clair.</li>
+      <li>Le bouton ouvre WhatsApp avec la commande complète : il ne reste qu'à envoyer.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  const WHATSAPP = "213000000000";
+  const PRODUCT = { name: "Robe Kaftan Sahara", price: 4900 };
+  const SIZES = ["S", "M", "L", "XL"];
+  const COLORS = [
+    { name: "Terracotta", hex: "#CF7652", tint: "sepia(.2)" },
+    { name: "Sable", hex: "#E4CFA8", tint: "hue-rotate(20deg) saturate(.6)" },
+    { name: "Nuit", hex: "#2C3550", tint: "hue-rotate(200deg) brightness(.85)" },
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  let qty = 1;
+
+  function chip(group, value, html, checked) {
+    const label = document.createElement("label");
+    label.innerHTML = `<input type="radio" name="${group}" value="${value}" ${checked ? "checked" : ""}><span>${html}</span>`;
+    return label;
+  }
+  SIZES.forEach((s, i) => $("sizes").append(chip("size", s, s, i === 1)));
+  COLORS.forEach((c, i) => $("colors").append(chip("color", c.name, `<i class="swatch" style="background:${c.hex}"></i>${c.name}`, i === 0)));
+
+  const formatDA = (n) => n.toLocaleString("fr-FR").replace(/ /g, " ") + " DA";
+
+  function buildMessage() {
+    const size = document.querySelector("input[name=size]:checked").value;
+    const color = document.querySelector("input[name=color]:checked").value;
+    return [
+      "🛍️ Nouvelle commande — Boutique Atlas",
+      "",
+      `Article : ${PRODUCT.name}`,
+      `Taille : ${size}`,
+      `Couleur : ${color}`,
+      `Quantité : ${qty}`,
+      `Total : ${formatDA(PRODUCT.price * qty)}`,
+      "",
+      `Nom : ${$("name").value.trim() || "…"}`,
+      `Téléphone : ${$("phone").value.trim() || "…"}`,
+      `Adresse : ${$("address").value.trim() || "…"}`,
+    ].join("\n");
+  }
+
+  function refresh() {
+    $("qty").textContent = qty;
+    $("preview").textContent = buildMessage();
+    const color = COLORS.find((c) => c.name === document.querySelector("input[name=color]:checked").value);
+    $("photo").style.filter = color.tint;
+  }
+
+  $("minus").onclick = () => { qty = Math.max(1, qty - 1); refresh(); };
+  $("plus").onclick = () => { qty = Math.min(20, qty + 1); refresh(); };
+  $("form").addEventListener("input", refresh);
+  $("form").addEventListener("change", refresh);
+
+  $("form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const missing = ["name", "phone", "address"].filter((id) => !$(id).value.trim());
+    if (missing.length) {
+      $("error").textContent = "Merci de remplir votre nom, téléphone et adresse.";
+      $(missing[0]).focus();
+      return;
+    }
+    $("error").textContent = "";
+    window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(buildMessage())}`, "_blank", "noopener");
+  });
+
+  refresh();
+</script>
+</body>
+</html>

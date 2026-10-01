@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salon Jasmin — Réservation</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --sheet: #188038; --sheet-bg: #E6F4EA;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 0 16px 48px; }
+  header { text-align: center; padding: 32px 0 16px; }
+  h1 { font: 600 28px Fraunces, serif; }
+  header p { color: var(--muted); margin-top: 6px; font-size: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 18px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
+  label:first-child { margin-top: 0; }
+  input, select { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line);
+    background: #fff; font: inherit; font-size: 15px; color: var(--ink); }
+  input:focus, select:focus { outline: none; border-color: var(--brand); }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  button[type=submit] { width: 100%; margin-top: 18px; padding: 16px; border: 0; border-radius: 999px; background: var(--brand);
+    color: #fff; font: 600 16px Inter, sans-serif; cursor: pointer; }
+  button[type=submit]:hover { background: var(--brand-dark); }
+  .toast { text-align: center; font-size: 14px; color: #1E7A42; margin-top: 12px; min-height: 20px; }
+
+  .sheet { margin-top: 24px; border-radius: 16px; overflow: hidden; border: 1px solid #DADCE0; background: #fff; }
+  .sheet-bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--sheet-bg); font-size: 13px; font-weight: 600; color: var(--sheet); }
+  .sheet-bar .dot { width: 18px; height: 22px; border-radius: 3px; background: var(--sheet); position: relative; }
+  .sheet-bar .dot::after { content: ""; position: absolute; inset: 6px 4px; border: 1.5px solid #fff; border-radius: 1px; }
+  .sheet-bar .live { margin-left: auto; font-weight: 500; color: var(--muted); font-size: 12px; }
+  .sheet-bar .live::before { content: "●"; color: #1E7A42; margin-right: 4px; animation: blink 1.5s infinite; }
+  @keyframes blink { 50% { opacity: .2; } }
+  .grid { overflow-x: auto; }
+  table { border-collapse: collapse; font-size: 12px; min-width: 100%; }
+  th, td { border: 1px solid #E3E3E3; padding: 6px 8px; white-space: nowrap; text-align: left; }
+  th { background: #F8F9FA; color: #5F6368; font-weight: 500; }
+  td:first-child, th:first-child { background: #F8F9FA; color: #5F6368; text-align: center; width: 28px; }
+  tr.new td { animation: flash 2.4s ease-out; }
+  @keyframes flash { 0% { background: #FCE8B2; } 100% { background: transparent; } }
+  tr.new td:first-child { animation: none; }
+  .clear { background: none; border: 0; color: var(--muted); font-size: 12px; text-decoration: underline; cursor: pointer; margin: 8px auto 0; display: block; }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Salon Jasmin</h1>
+    <p>Réservez en 20 secondes. Votre rendez-vous arrive directement dans notre agenda.</p>
+  </header>
+
+  <form class="card" id="form">
+    <label for="nom">Nom</label>
+    <input id="nom" name="nom" required autocomplete="name" placeholder="Ex. Sara Haddad">
+
+    <label for="telephone">Téléphone</label>
+    <input id="telephone" name="telephone" type="tel" required autocomplete="tel" placeholder="Ex. 0550 00 00 00">
+
+    <label for="prestation">Prestation</label>
+    <select id="prestation" name="prestation" required>
+      <option>Coupe + brushing</option>
+      <option>Couleur</option>
+      <option>Soin kératine</option>
+      <option>Manucure</option>
+      <option>Maquillage mariée</option>
+    </select>
+
+    <div class="row">
+      <div>
+        <label for="date">Date</label>
+        <input id="date" name="date" type="date" required>
+      </div>
+      <div>
+        <label for="heure">Heure</label>
+        <select id="heure" name="heure" required></select>
+      </div>
+    </div>
+
+    <button type="submit">Réserver</button>
+    <p class="toast" id="toast" role="status"></p>
+  </form>
+
+  <section class="sheet" aria-label="Aperçu Google Sheets">
+    <div class="sheet-bar"><span class="dot"></span>Réservations — Salon Jasmin<span class="live">en direct</span></div>
+    <div class="grid">
+      <table>
+        <thead><tr><th></th><th>A · Reçu le</th><th>B · Nom</th><th>C · Téléphone</th><th>D · Prestation</th><th>E · Date</th><th>F · Heure</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+  <button class="clear" id="clear" type="button">Vider la démo</button>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Créez un Google Sheets « Réservations » avec une colonne par information.</li>
+      <li>Dans Extensions → Apps Script, collez le petit script qui ajoute une ligne.</li>
+      <li>Déployez-le en « Application Web » et copiez le lien.</li>
+      <li>Collez ce lien dans le formulaire : chaque réservation remplit le tableau toute seule.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  // Collez ici l'URL de votre Application Web Apps Script (voir apps-script.gs).
+  // Laissez vide pour la démo : les lignes s'affichent seulement dans l'aperçu ci-dessus.
+  const SCRIPT_URL = "";
+  const STORAGE_KEY = "salon-jasmin-reservations";
+
+  const $ = (id) => document.getElementById(id);
+  const pad = (n) => String(n).padStart(2, "0");
+
+  for (let h = 9; h <= 18; h++) for (const m of [0, 30]) {
+    if (h === 18 && m) break;
+    $("heure").append(new Option(`${pad(h)}:${pad(m)}`));
+  }
+  const isoDay = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  $("date").value = isoDay(new Date(Date.now() + 864e5));
+  $("date").min = isoDay(new Date());
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
+  }
+  function save(rows) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(rows)); } catch {}
+  }
+
+  const SAMPLE = [
+    { recu: "08/10 09:12", nom: "Yasmine B.", telephone: "0551 12 34 56", prestation: "Couleur", date: "2026-10-12", heure: "10:00" },
+    { recu: "08/10 13:40", nom: "Nadia K.", telephone: "0661 98 76 54", prestation: "Manucure", date: "2026-10-12", heure: "14:30" },
+  ];
+  let rows = load();
+  if (!rows.length) rows = SAMPLE.slice();
+
+  function render(highlightLast) {
+    $("rows").innerHTML = "";
+    rows.forEach((r, i) => {
+      const tr = document.createElement("tr");
+      if (highlightLast && i === rows.length - 1) tr.className = "new";
+      const dateFr = r.date.split("-").reverse().join("/");
+      [i + 2, r.recu, r.nom, r.telephone, r.prestation, dateFr, r.heure].forEach((v) => {
+        const td = document.createElement("td");
+        td.textContent = v;
+        tr.append(td);
+      });
+      $("rows").append(tr);
+    });
+  }
+
+  $("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target));
+    const now = new Date();
+    rows.push({ recu: `${pad(now.getDate())}/${pad(now.getMonth() + 1)} ${pad(now.getHours())}:${pad(now.getMinutes())}`, ...data });
+    save(rows);
+    render(true);
+    $("toast").textContent = `Merci ${data.nom.split(" ")[0]} ! Rendez-vous enregistré ✅`;
+
+    if (SCRIPT_URL) {
+      try {
+        // no-cors : Apps Script ne renvoie pas les en-têtes CORS, la requête part quand même.
+        await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: new URLSearchParams({ ...data, source: "site" }) });
+      } catch {
+        $("toast").textContent = "Enregistré ici, mais l'envoi vers Google Sheets a échoué. Vérifiez votre connexion.";
+      }
+    }
+    e.target.reset();
+    $("date").value = data.date;
+  });
+
+  $("clear").onclick = () => { rows = SAMPLE.slice(); save([]); render(); $("toast").textContent = ""; };
+  render();
+</script>
+</body>
+</html>

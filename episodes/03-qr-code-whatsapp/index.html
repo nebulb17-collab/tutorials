@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QR code WhatsApp</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 32px 0 8px; }
+  header small { color: var(--brand-dark); font-weight: 600; letter-spacing: 1px; font-size: 12px; }
+  h1 { font: 600 28px Fraunces, serif; margin-top: 4px; }
+  header p { color: var(--muted); margin-top: 6px; font-size: 14px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 16px 0 8px; }
+  input, textarea { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line);
+    background: var(--card); font: inherit; font-size: 15px; }
+  input:focus, textarea:focus { outline: none; border-color: var(--brand); }
+  textarea { min-height: 70px; resize: vertical; }
+  .link { margin-top: 12px; font-size: 12px; color: var(--muted); word-break: break-all; background: var(--card);
+    border: 1px dashed var(--line); border-radius: 10px; padding: 10px; }
+  .tabs { display: flex; gap: 8px; margin: 28px 0 14px; }
+  .tabs button { flex: 1; padding: 10px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card);
+    font: 600 14px Inter, sans-serif; cursor: pointer; color: var(--ink); }
+  .tabs button[aria-selected=true] { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+  /* Chevalet de table */
+  .table-card { background: var(--card); border-radius: 20px; padding: 28px 24px; text-align: center;
+    box-shadow: 0 20px 40px -20px #6b3a2440; border-top: 10px solid var(--brand); }
+  .table-card .biz { font: 600 22px Fraunces, serif; }
+  .table-card .cta { margin: 6px 0 18px; color: var(--muted); font-size: 14px; }
+  .qr { width: 200px; height: 200px; margin: 0 auto; }
+  .qr svg { width: 100%; height: 100%; display: block; }
+  .table-card .hint { margin-top: 16px; font-weight: 600; color: var(--brand-dark); font-size: 14px; }
+
+  /* Vitrine */
+  .window { border-radius: 20px; padding: 28px; position: relative; overflow: hidden;
+    background: linear-gradient(160deg, #cfe3ea 0%, #e8f1f4 45%, #bcd5de 100%); }
+  .window::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 40%, #ffffff70 48%, transparent 56%); }
+  .sticker { position: relative; width: 220px; margin: 0 auto; background: var(--brand); color: #fff; border-radius: 50%;
+    aspect-ratio: 1; display: grid; place-items: center; text-align: center; padding: 30px; box-shadow: 0 10px 30px #0003; }
+  .sticker .qr { width: 110px; height: 110px; background: #fff; padding: 6px; border-radius: 10px; }
+  .sticker strong { font: 600 15px Fraunces, serif; display: block; }
+  .sticker span { font-size: 11px; opacity: .9; }
+
+  .actions { display: flex; gap: 8px; margin-top: 16px; }
+  .actions button { flex: 1; padding: 14px; border: 0; border-radius: 999px; background: var(--brand); color: #fff;
+    font: 600 14px Inter, sans-serif; cursor: pointer; }
+  .actions button.ghost { background: var(--card); color: var(--ink); border: 1.5px solid var(--line); }
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+  [hidden] { display: none !important; }
+
+  @media print {
+    body { background: #fff; }
+    .wrap > *:not(#previews) { display: none !important; }
+    .tabs { display: none; }
+    .table-card { box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <small>AUTOMATISE ÇA · ÉPISODE 3</small>
+    <h1>Votre QR code WhatsApp</h1>
+    <p>Le client scanne, WhatsApp s'ouvre avec son message déjà écrit.</p>
+  </header>
+
+  <label for="biz">Nom du commerce</label>
+  <input id="biz" value="Café Lumière">
+
+  <label for="phone">Numéro WhatsApp (avec indicatif)</label>
+  <input id="phone" type="tel" value="+213 000 000 000">
+
+  <label for="msg">Message pré-rempli</label>
+  <textarea id="msg">Bonjour Café Lumière ! Je suis à la table et je voudrais commander :</textarea>
+
+  <div class="link" id="link"></div>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-view="table">Chevalet de table</button>
+    <button role="tab" aria-selected="false" data-view="window">Vitrine</button>
+  </div>
+
+  <div id="previews">
+    <div class="table-card" data-panel="table">
+      <div class="biz" data-biz></div>
+      <p class="cta">Commandez depuis votre table</p>
+      <div class="qr" data-qr></div>
+      <p class="hint">📱 Scannez avec l'appareil photo</p>
+    </div>
+
+    <div class="window" data-panel="window" hidden>
+      <div class="sticker">
+        <div>
+          <strong data-biz></strong>
+          <span>Écrivez-nous sur WhatsApp</span>
+          <div class="qr" data-qr style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="download">Télécharger le QR (PNG)</button>
+    <button id="print" class="ghost">Imprimer</button>
+  </div>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Créez votre lien : wa.me/ + votre numéro sans « + » ni espaces.</li>
+      <li>Ajoutez ?text= et le message que le client enverra.</li>
+      <li>Transformez ce lien en QR code (gratuit, en quelques secondes).</li>
+      <li>Imprimez-le sur vos tables, votre vitrine ou vos sacs.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  function waLink() {
+    const number = $("phone").value.replace(/\D/g, "");
+    const text = $("msg").value.trim();
+    return `https://wa.me/${number}` + (text ? `?text=${encodeURIComponent(text)}` : "");
+  }
+
+  function makeQr(text) {
+    const qr = qrcode(0, "M");
+    qr.addData(text);
+    qr.make();
+    return qr;
+  }
+
+  function render() {
+    const link = waLink();
+    $("link").textContent = link;
+    document.querySelectorAll("[data-biz]").forEach((el) => (el.textContent = $("biz").value || "Votre commerce"));
+    const svg = makeQr(link).createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+    document.querySelectorAll("[data-qr]").forEach((el) => (el.innerHTML = svg));
+  }
+
+  document.querySelectorAll(".tabs button").forEach((btn) => {
+    btn.onclick = () => {
+      document.querySelectorAll(".tabs button").forEach((b) => b.setAttribute("aria-selected", b === btn));
+      document.querySelectorAll("[data-panel]").forEach((p) => (p.hidden = p.dataset.panel !== btn.dataset.view));
+    };
+  });
+
+  $("download").onclick = () => {
+    const qr = makeQr(waLink());
+    const count = qr.getModuleCount();
+    const cell = 16, margin = cell * 4;
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = count * cell + margin * 2;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#000";
+    for (let r = 0; r < count; r++)
+      for (let c = 0; c < count; c++)
+        if (qr.isDark(r, c)) ctx.fillRect(margin + c * cell, margin + r * cell, cell, cell);
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = "qr-whatsapp.png";
+    a.click();
+  };
+
+  $("print").onclick = () => window.print();
+  ["biz", "phone", "msg"].forEach((id) => $(id).addEventListener("input", render));
+  render();
+</script>
+</body>
+</html>

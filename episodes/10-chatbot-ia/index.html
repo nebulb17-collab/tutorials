@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salon Jasmin — Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --ok: #1E7A42;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 28px 0 14px; display: flex; align-items: center; gap: 12px; }
+  .logo { width: 44px; height: 44px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; font: 600 22px Fraunces, serif; flex-shrink: 0; }
+  h1 { font: 600 24px Fraunces, serif; }
+  header p { color: var(--muted); font-size: 13px; }
+
+  .chat { background: var(--card); border: 1px solid var(--line); border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; height: min(600px, 74vh); box-shadow: 0 24px 50px -30px #6b3a2460; }
+  .chat-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: #FBEDE6; display: grid; place-items: center; font-size: 18px; }
+  .chat-head b { display: block; font-size: 14px; }
+  .chat-head small { color: var(--ok); font-size: 12px; }
+  .chat-head small::before { content: "● "; }
+  .mode { margin-left: auto; font-size: 11px; color: var(--muted); background: var(--bg); border-radius: 999px; padding: 4px 8px; }
+  .log { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 82%; padding: 10px 14px; border-radius: 18px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; animation: in .25s ease-out; }
+  @keyframes in { from { transform: translateY(6px); opacity: 0; } }
+  .bot { background: var(--bg); border-bottom-left-radius: 4px; align-self: flex-start; }
+  .me { background: var(--brand); color: #fff; border-bottom-right-radius: 4px; align-self: flex-end; }
+  .typing { display: inline-flex; gap: 4px; }
+  .typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: dot 1s infinite; }
+  .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+  @keyframes dot { 50% { transform: translateY(-4px); opacity: .4; } }
+  .chips { display: flex; gap: 6px; overflow-x: auto; padding: 0 16px 10px; }
+  .chips button { flex-shrink: 0; border: 1.5px solid var(--line); background: var(--card); border-radius: 999px; padding: 8px 12px; font: 500 13px Inter, sans-serif; cursor: pointer; color: var(--ink); }
+  .chips button:hover { border-color: var(--brand); }
+  form { display: flex; gap: 8px; padding: 10px 12px 12px; border-top: 1px solid var(--line); }
+  form input { flex: 1; min-width: 0; padding: 12px 14px; border-radius: 999px; border: 1.5px solid var(--line); font: inherit; font-size: 15px; }
+  form input:focus { outline: none; border-color: var(--brand); }
+  form button { width: 46px; border: 0; border-radius: 50%; background: var(--brand); color: #fff; font-size: 18px; cursor: pointer; }
+
+  details { margin-top: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; }
+  summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+  details pre { white-space: pre-wrap; font: 13px/1.6 Inter, sans-serif; color: var(--muted); margin-top: 10px; }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">J</div>
+    <div><h1>Salon Jasmin</h1><p>Une question ? L'assistant répond tout de suite, même à minuit.</p></div>
+  </header>
+
+  <section class="chat" aria-label="Discussion avec l'assistant">
+    <div class="chat-head">
+      <div class="avatar">🌸</div>
+      <div><b>Assistant du salon</b><small>en ligne</small></div>
+      <span class="mode" id="mode"></span>
+    </div>
+    <div class="log" id="log" aria-live="polite"></div>
+    <div class="chips" id="chips"></div>
+    <form id="form">
+      <input id="input" autocomplete="off" placeholder="Écrivez votre question…" aria-label="Votre question" maxlength="500">
+      <button aria-label="Envoyer">➤</button>
+    </form>
+  </section>
+
+  <details>
+    <summary>Ce que l'assistant sait (et rien d'autre)</summary>
+    <pre id="infos"></pre>
+  </details>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Écrivez vos infos une fois : horaires, prix, adresse, paiement, annulation.</li>
+      <li>Donnez-les à l'IA avec une règle : répondre seulement avec ces infos.</li>
+      <li>Ajoutez la petite fenêtre de discussion sur votre site.</li>
+      <li>Les clients ont la réponse en 2 secondes, et le reste arrive sur votre WhatsApp.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  // Adresse du petit serveur IA (outils/ia-worker). Vide = réponses automatiques par mots-clés, sans IA.
+  const AI_ENDPOINT = "";
+  const WHATSAPP = "+213 000 000 000";
+
+  // Les infos du commerce : la seule source des réponses (à garder identiques à outils/ia-worker/src/commerces.ts).
+  const INFOS = {
+    adresse: "12 rue des Jasmins, Hydra, Alger. Parking gratuit devant le salon.",
+    horaires: "Du mardi au samedi de 9h à 19h, le dimanche de 10h à 16h. Fermé le lundi.",
+    prix: [
+      ["Brushing", "1 200 DA", "30 min", ["brushing"]],
+      ["Coupe + brushing", "2 500 DA", "1 h", ["coupe"]],
+      ["Couleur", "à partir de 5 000 DA", "1 h 30", ["couleur", "coloration", "meches", "balayage"]],
+      ["Soin kératine", "à partir de 9 000 DA", "2 h", ["keratine", "lissage", "soin"]],
+      ["Manucure", "2 000 DA", "1 h", ["manucure", "ongles", "vernis"]],
+      ["Maquillage mariée", "sur devis, essai conseillé 2 semaines avant", "", ["mariee", "mariage", "maquillage"]],
+    ],
+    reservation: "En ligne 24h/24 sur notre site, ou par WhatsApp.",
+    paiement: "Espèces et carte CIB/Edahabia.",
+    annulation: "Gratuite jusqu'à la veille, merci de nous prévenir.",
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const history = [];
+  $("mode").textContent = AI_ENDPOINT ? "IA" : "démo";
+  $("infos").textContent = [
+    `Adresse : ${INFOS.adresse}`, `Horaires : ${INFOS.horaires}`,
+    "Prix :", ...INFOS.prix.map(([n, p, d]) => `• ${n} : ${p}${d ? ` (${d})` : ""}`),
+    `Réservation : ${INFOS.reservation}`, `Paiement : ${INFOS.paiement}`, `Annulation : ${INFOS.annulation}`,
+  ].join("\n");
+
+  const norm = (t) => t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  // Un mot-clé compte seulement en début de mot : « soin » ne se déclenche pas dans « besoin ».
+  const has = (q, words) => words.some((w) => new RegExp(`(^|[^a-z])${w}`).test(q));
+
+  // Réponses sans IA : simples règles par mots-clés, à partir des mêmes infos.
+  function localAnswer(question) {
+    const q = norm(question);
+    const service = INFOS.prix.find(([, , , keys]) => has(q, keys));
+    if (has(q, ["lundi"])) return "Le salon est fermé le lundi. On vous accueille du mardi au samedi de 9h à 19h, et le dimanche de 10h à 16h.";
+    if (has(q, ["prix", "combien", "tarif", "coute", "cout"]) || (service && !has(q, ["reserv", "rdv", "rendez"]))) {
+      if (service) return `${service[0]} : ${service[1]}${service[2] ? `, comptez ${service[2]}` : ""}.`;
+      return "Nos prix :\n" + INFOS.prix.map(([n, p]) => `• ${n} : ${p}`).join("\n");
+    }
+    if (has(q, ["horaire", "heure", "ouvert", "ferme", "dimanche", "samedi", "quand"])) return `Nous sommes ouverts ${INFOS.horaires.charAt(0).toLowerCase() + INFOS.horaires.slice(1)}`;
+    if (has(q, ["adresse", "ou etes", "etes ou", "est ou", "ou se trouve", "trouver", "situe", "localis", "venir", "parking", "garer"])) return `Nous sommes au ${INFOS.adresse}`;
+    if (has(q, ["reserv", "rdv", "rendez", "disponib", "place"])) return `${INFOS.reservation} Vous ne voyez que les créneaux libres, et la confirmation arrive tout de suite.`;
+    if (has(q, ["paie", "payer", "carte", "cib", "edahabia", "espece"])) return `Paiement accepté : ${INFOS.paiement.toLowerCase()}`;
+    if (has(q, ["annul", "decal", "report", "retard"])) return `Annulation ${INFOS.annulation.charAt(0).toLowerCase() + INFOS.annulation.slice(1)}`;
+    if (has(q, ["merci"])) return "Avec plaisir ! À bientôt au salon 🌸";
+    if (has(q, ["bonjour", "salut", "bonsoir", "salam", "coucou"])) return "Bonjour ! Posez-moi votre question : horaires, prix, adresse ou réservation.";
+    return `Je n'ai pas cette information. Écrivez-nous sur WhatsApp au ${WHATSAPP}, l'équipe vous répond vite 🙂`;
+  }
+
+  async function aiAnswer(question) {
+    const res = await fetch(AI_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode: "faq", commerce: "salon-jasmin", question, historique: history.slice(-10) }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.reponse) throw new Error(data.erreur || "Erreur");
+    return data.reponse;
+  }
+
+  function bubble(text, who) {
+    const el = document.createElement("div");
+    el.className = `msg ${who}`;
+    el.textContent = text;
+    $("log").append(el);
+    $("log").scrollTop = $("log").scrollHeight;
+    return el;
+  }
+
+  let busy = false;
+  async function ask(question) {
+    question = question.trim();
+    if (!question || busy) return;
+    busy = true;
+    bubble(question, "me");
+    const typing = bubble("", "bot");
+    typing.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>';
+    const started = Date.now();
+    let answer;
+    try {
+      answer = AI_ENDPOINT ? await aiAnswer(question) : localAnswer(question);
+    } catch {
+      answer = localAnswer(question);
+    }
+    // Petite pause pour que la réponse paraisse naturelle (et lisible dans la vidéo).
+    await new Promise((r) => setTimeout(r, Math.max(0, 700 - (Date.now() - started))));
+    typing.textContent = answer;
+    history.push({ role: "user", content: question }, { role: "assistant", content: answer });
+    busy = false;
+  }
+
+  ["Vos horaires ?", "Combien coûte une couleur ?", "Vous êtes où ?", "Je peux venir lundi ?", "Comment réserver ?"].forEach((q) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = q;
+    b.onclick = () => ask(q);
+    $("chips").append(b);
+  });
+
+  $("form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const q = $("input").value;
+    $("input").value = "";
+    ask(q);
+  });
+
+  bubble("Bonjour 👋 Je suis l'assistant du Salon Jasmin. Horaires, prix, adresse, réservation : je vous réponds tout de suite.", "bot");
+</script>
+</body>
+</html>

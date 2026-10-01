@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rénov' Express — Devis</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --ok: #1E7A42;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 32px 0 16px; }
+  header small { color: var(--brand-dark); font-weight: 600; letter-spacing: 1px; font-size: 12px; }
+  h1 { font: 600 28px Fraunces, serif; margin-top: 4px; }
+  header p { color: var(--muted); margin-top: 6px; font-size: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 18px; }
+  label, .label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
+  label:first-child { margin-top: 0; }
+  input, select, textarea { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line);
+    background: #fff; font: inherit; font-size: 15px; color: var(--ink); }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--brand); }
+  textarea { min-height: 80px; resize: vertical; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .types { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .types input { position: absolute; opacity: 0; pointer-events: none; }
+  .types span { display: block; border: 1.5px solid var(--line); border-radius: 12px; padding: 12px; font-size: 14px; cursor: pointer; text-align: center; }
+  .types input:checked + span { border-color: var(--brand); background: #FBEDE6; color: var(--brand-dark); font-weight: 600; }
+  .types input:focus-visible + span { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .btn { width: 100%; margin-top: 18px; padding: 16px; border: 0; border-radius: 999px; background: var(--brand); color: #fff; font: 600 16px Inter, sans-serif; cursor: pointer; }
+  .btn:hover { background: var(--brand-dark); }
+  .thanks { text-align: center; padding: 28px 18px; }
+  .thanks[hidden], form[hidden] { display: none; }
+  .thanks .big { font-size: 44px; }
+  .thanks h2 { font: 600 22px Fraunces, serif; margin-top: 8px; }
+  .thanks p { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+  /* Téléphone du patron */
+  h3.side { font: 600 19px Fraunces, serif; margin: 32px 0 12px; }
+  .owner { background: #1b1512; border-radius: 28px; padding: 14px; color: #fff; position: relative; min-height: 150px; overflow: hidden; }
+  .owner .top { display: flex; justify-content: space-between; font-size: 12px; opacity: .7; }
+  .owner .idle { text-align: center; opacity: .5; font-size: 13px; padding: 40px 0; }
+  .notif { background: #ffffffee; color: var(--ink); border-radius: 16px; padding: 12px; margin-top: 12px; font-size: 13px; line-height: 1.45;
+    animation: drop .55s cubic-bezier(.2, .9, .3, 1.3); }
+  @keyframes drop { from { transform: translateY(-40px); opacity: 0; } }
+  .notif .app { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; margin-bottom: 4px; }
+  .notif b { display: block; }
+  .notif a { display: inline-block; margin-top: 8px; background: #25D366; color: #fff; text-decoration: none; border-radius: 999px; padding: 6px 12px; font-weight: 600; font-size: 12px; }
+
+  .leads { margin-top: 16px; background: #fff; border-radius: 16px; border: 1px solid #DADCE0; overflow-x: auto; }
+  table { border-collapse: collapse; font-size: 12px; width: 100%; }
+  th, td { border-bottom: 1px solid #EEE; padding: 8px; text-align: left; white-space: nowrap; }
+  th { background: #F8F9FA; color: #5F6368; font-weight: 500; }
+  .tag { background: #FBEDE6; color: var(--brand-dark); border-radius: 999px; padding: 2px 8px; font-weight: 600; }
+  tr.new td { animation: flash 2.4s ease-out; }
+  @keyframes flash { 0% { background: #FCE8B2; } }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <small>RÉNOV' EXPRESS · ALGER</small>
+    <h1>Votre devis gratuit en 1 minute</h1>
+    <p>Salle de bain, cuisine, peinture : décrivez votre projet, on vous rappelle aujourd'hui.</p>
+  </header>
+
+  <div class="card">
+    <form id="form">
+      <span class="label">Type de travaux</span>
+      <div class="types" id="types"></div>
+
+      <div class="row">
+        <div><label for="surface">Surface (m²)</label><input id="surface" name="surface" type="number" min="1" value="12" required></div>
+        <div><label for="delai">Délai</label>
+          <select id="delai" name="delai"><option>Dès que possible</option><option>Dans le mois</option><option>Dans 3 mois</option><option>Je me renseigne</option></select></div>
+      </div>
+
+      <label for="budget">Budget</label>
+      <select id="budget" name="budget">
+        <option>Moins de 150 000 DA</option><option selected>150 000 – 500 000 DA</option><option>500 000 – 1 500 000 DA</option><option>Plus de 1 500 000 DA</option>
+      </select>
+
+      <label for="details">Votre projet en quelques mots</label>
+      <textarea id="details" name="details">Refaire la salle de bain : douche italienne et faïence.</textarea>
+
+      <label for="nom">Nom</label>
+      <input id="nom" name="nom" required autocomplete="name" value="Karim Ouali">
+      <div class="row">
+        <div><label for="telephone">Téléphone</label><input id="telephone" name="telephone" type="tel" required autocomplete="tel" value="0550 12 34 56"></div>
+        <div><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" placeholder="facultatif"></div>
+      </div>
+
+      <label for="source">Comment nous avez-vous connus ?</label>
+      <select id="source" name="source"><option>Instagram</option><option>Google</option><option>Facebook</option><option>Bouche-à-oreille</option><option>TikTok</option></select>
+
+      <button class="btn" type="submit">Recevoir mon devis</button>
+    </form>
+
+    <div class="thanks" id="thanks" hidden>
+      <div class="big">📨</div>
+      <h2>Demande bien reçue</h2>
+      <p>On vous rappelle dans la journée. Gardez votre téléphone près de vous 🙂</p>
+      <button class="btn" id="again" type="button">Nouvelle demande</button>
+    </div>
+  </div>
+
+  <h3 class="side">Pendant ce temps, sur le téléphone du patron…</h3>
+  <div class="owner" aria-live="polite">
+    <div class="top"><span id="clock">--:--</span><span>📶 🔋</span></div>
+    <div id="notifs"><div class="idle">Aucune nouvelle demande</div></div>
+  </div>
+
+  <div class="leads">
+    <table>
+      <thead><tr><th>Reçu</th><th>Nom</th><th>Travaux</th><th>Budget</th><th>Source</th><th>Statut</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Un formulaire de devis avec les bonnes questions : travaux, surface, budget, délai.</li>
+      <li>Chaque demande est enregistrée dans un tableau « Prospects ».</li>
+      <li>Au même moment, une alerte arrive sur votre téléphone avec tous les détails.</li>
+      <li>Vous rappelez en 5 minutes, pas en 2 jours : le client est encore chaud.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  const SCRIPT_URL = ""; // URL de l'Application Web (apps-script.gs). Vide = démo.
+  const TYPES = ["🛁 Salle de bain", "🍳 Cuisine", "🎨 Peinture", "🧱 Rénovation complète"];
+  const $ = (id) => document.getElementById(id);
+  const pad = (n) => String(n).padStart(2, "0");
+  const hhmm = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+  TYPES.forEach((t, i) => {
+    const l = document.createElement("label");
+    l.innerHTML = `<input type="radio" name="travaux" value="${t.slice(2).trim()}" ${i === 0 ? "checked" : ""}><span>${t}</span>`;
+    $("types").append(l);
+  });
+
+  // La source peut aussi venir du lien : ?source=instagram (voir épisode 9).
+  const slug = (t) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z]+/g, "-").replace(/^-|-$/g, "");
+  const fromUrl = slug(new URLSearchParams(location.search).get("source") || "");
+  if (fromUrl) [...$("source").options].forEach((o) => { if (slug(o.text).startsWith(fromUrl)) o.selected = true; });
+
+  const leads = [
+    { recu: "hier 16:02", nom: "Samia L.", travaux: "Cuisine", budget: "500 000 – 1 500 000 DA", source: "Google", statut: "Répondu" },
+  ];
+
+  function renderLeads(highlight) {
+    $("rows").innerHTML = "";
+    leads.forEach((l, i) => {
+      const tr = document.createElement("tr");
+      if (highlight && i === 0) tr.className = "new";
+      [l.recu, l.nom, l.travaux, l.budget, l.source].forEach((v) => { const td = document.createElement("td"); td.textContent = v; tr.append(td); });
+      const td = document.createElement("td");
+      td.innerHTML = `<span class="tag"></span>`;
+      td.firstChild.textContent = l.statut;
+      tr.append(td);
+      $("rows").append(tr);
+    });
+  }
+
+  $("form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target));
+    const now = new Date();
+    leads.unshift({ recu: `auj. ${hhmm(now)}`, nom: data.nom, travaux: data.travaux, budget: data.budget, source: data.source, statut: "Nouveau" });
+
+    if (SCRIPT_URL) fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: new URLSearchParams(data) }).catch(() => {});
+
+    $("form").hidden = true;
+    $("thanks").hidden = false;
+
+    // L'alerte arrive chez le patron.
+    setTimeout(() => {
+      const idle = document.querySelector("#notifs .idle");
+      if (idle) idle.remove();
+      const tel = data.telephone.replace(/\D/g, "").replace(/^0/, "213");
+      const n = document.createElement("div");
+      n.className = "notif";
+      n.innerHTML = `<div class="app"><span>✉️ Gmail · Alerte devis</span><span>maintenant</span></div>
+        <b></b><span class="body"></span><br><a target="_blank" rel="noopener">Répondre sur WhatsApp</a>`;
+      n.querySelector("b").textContent = `🔔 Nouveau devis : ${data.travaux} — ${data.nom}`;
+      n.querySelector(".body").textContent = `${data.surface} m² · ${data.budget} · ${data.delai} · via ${data.source}`;
+      n.querySelector("a").href = `https://wa.me/${tel}?text=${encodeURIComponent(`Bonjour ${data.nom.split(" ")[0]}, ici Rénov' Express. Merci pour votre demande de devis (${data.travaux.toLowerCase()}, ${data.surface} m²). Vous êtes disponible pour un appel rapide ?`)}`;
+      $("notifs").prepend(n);
+      renderLeads(true);
+    }, 900);
+  });
+
+  $("again").onclick = () => { $("thanks").hidden = true; $("form").hidden = false; };
+  const tick = () => ($("clock").textContent = hhmm(new Date()));
+  tick();
+  setInterval(tick, 10000);
+  renderLeads();
+</script>
+</body>
+</html>

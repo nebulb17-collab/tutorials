@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salon Jasmin — Créneaux</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --ok: #1E7A42;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 28px 0 12px; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+  h1 { font: 600 26px Fraunces, serif; }
+  header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .now { background: var(--ink); color: #fff; border-radius: 12px; padding: 8px 10px; font-size: 12px; text-align: center; flex-shrink: 0; }
+  .now b { display: block; font-size: 18px; }
+  h2 { font-size: 13px; font-weight: 600; margin: 20px 0 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+
+  .services { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+  .days { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x mandatory; }
+  .pill, .day { border: 1.5px solid var(--line); background: var(--card); border-radius: 14px; cursor: pointer; color: var(--ink); font-family: inherit; }
+  .pill { padding: 10px 14px; font-size: 14px; white-space: nowrap; }
+  .pill small { color: var(--muted); margin-left: 4px; }
+  .day { min-width: 62px; padding: 10px 6px; text-align: center; scroll-snap-align: start; }
+  .day span { display: block; font-size: 11px; color: var(--muted); text-transform: capitalize; }
+  .day b { font-size: 18px; }
+  .day:disabled { opacity: .35; cursor: default; }
+  .pill[aria-pressed=true], .day[aria-pressed=true] { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .pill[aria-pressed=true] small, .day[aria-pressed=true] span { color: #fff; }
+
+  .slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .slot { padding: 12px 0; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card); font: 600 14px Inter, sans-serif; cursor: pointer; color: var(--ink);
+    animation: pop .3s backwards; }
+  .slot[aria-pressed=true] { background: var(--ink); color: #fff; border-color: var(--ink); }
+  @keyframes pop { from { transform: scale(.85); opacity: 0; } }
+  .empty { grid-column: 1 / -1; color: var(--muted); font-size: 14px; text-align: center; padding: 18px; background: var(--card); border-radius: 12px; }
+
+  .form { margin-top: 20px; background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 18px; }
+  .form[hidden] { display: none; }
+  .recap { font-size: 14px; margin-bottom: 12px; }
+  .recap b { color: var(--brand-dark); }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 6px; }
+  input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line); font: inherit; font-size: 15px; }
+  input:focus { outline: none; border-color: var(--brand); }
+  .btn { width: 100%; margin-top: 16px; padding: 16px; border: 0; border-radius: 999px; background: var(--brand); color: #fff; font: 600 16px Inter, sans-serif; cursor: pointer; }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+
+  .confirm { position: fixed; inset: 0; background: #2A211Ccc; display: grid; place-items: center; padding: 16px; z-index: 10; }
+  .confirm[hidden] { display: none; }
+  .confirm .box { background: var(--card); border-radius: 24px; padding: 24px; max-width: 380px; width: 100%; text-align: center; animation: pop .4s; }
+  .check { width: 64px; height: 64px; border-radius: 50%; background: var(--ok); color: #fff; font-size: 34px; display: grid; place-items: center; margin: 0 auto 12px; }
+  .confirm h3 { font: 600 22px Fraunces, serif; }
+  .confirm p { color: var(--muted); font-size: 14px; margin-top: 6px; }
+  .bubble { text-align: left; background: #E7F8EC; border-radius: 14px 14px 14px 4px; padding: 12px; font-size: 13px; line-height: 1.5; margin-top: 16px; white-space: pre-wrap; }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Salon Jasmin</h1>
+      <p>Seuls les créneaux libres s'affichent.</p>
+    </div>
+    <div class="now" aria-label="Heure actuelle"><b id="now">--:--</b>maintenant</div>
+  </header>
+
+  <h2>1 · Prestation</h2>
+  <div class="services" id="services"></div>
+
+  <h2>2 · Jour</h2>
+  <div class="days" id="days"></div>
+
+  <h2>3 · Créneau libre</h2>
+  <div class="slots" id="slots"></div>
+
+  <form class="form" id="form" hidden>
+    <p class="recap" id="recap"></p>
+    <label for="nom">Nom</label>
+    <input id="nom" required autocomplete="name" placeholder="Ex. Lina Mansouri">
+    <label for="tel">Téléphone</label>
+    <input id="tel" type="tel" required autocomplete="tel" placeholder="Ex. 0550 00 00 00">
+    <button class="btn" type="submit">Confirmer le rendez-vous</button>
+  </form>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Fixez vos horaires et la durée de chaque créneau.</li>
+      <li>La page lit les rendez-vous déjà pris et n'affiche que les créneaux libres.</li>
+      <li>Le client choisit, laisse son nom : le créneau disparaît pour les autres.</li>
+      <li>La confirmation part tout de suite, même à 23h, même le dimanche.</li>
+    </ol>
+  </section>
+</div>
+
+<div class="confirm" id="confirm" hidden role="dialog" aria-modal="true" aria-labelledby="ok-title">
+  <div class="box">
+    <div class="check">✓</div>
+    <h3 id="ok-title">C'est réservé !</h3>
+    <p id="ok-text"></p>
+    <div class="bubble" id="bubble"></div>
+    <button class="btn" id="ics">Ajouter à mon agenda</button>
+    <button class="btn ghost" id="close">Fermer</button>
+  </div>
+</div>
+
+<script>
+  // URL Apps Script de l'épisode 4 (doGet ?action=creneaux + doPost). Vide = démo locale.
+  const SCRIPT_URL = "";
+  const STORAGE_KEY = "salon-jasmin-creneaux";
+  const OPEN = { start: 9, end: 19 };          // 9h → 19h
+  const CLOSED_DAYS = [1];                      // fermé le lundi (0 = dimanche)
+  const SERVICES = [
+    { name: "Coupe + brushing", min: 60, price: 2500 },
+    { name: "Brushing", min: 30, price: 1200 },
+    { name: "Couleur", min: 90, price: 5000 },
+    { name: "Manucure", min: 60, price: 2000 },
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const pad = (n) => String(n).padStart(2, "0");
+  const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const toMin = (hhmm) => { const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; };
+
+  let service = SERVICES[0], day = null, slot = null, taken = [];
+
+  function loadLocal() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
+  function saveLocal(list) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch {} }
+
+  // Quelques rendez-vous fictifs pour que l'agenda ait l'air vivant.
+  function demoTaken() {
+    const list = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(Date.now() + i * 864e5);
+      [[10, 0, 60], [11, 30, 90], [14, 0, 60], [16, 30, 30]].forEach(([h, m, dur], k) => {
+        if ((i + k) % 3 !== 0) list.push({ date: iso(d), heure: `${pad(h)}:${pad(m)}`, duree: dur });
+      });
+    }
+    return list;
+  }
+
+  async function loadTaken() {
+    if (SCRIPT_URL) {
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=creneaux`);
+        const data = await res.json();
+        return data.occupes.map((o) => ({ ...o, duree: 60 }));
+      } catch { /* repli sur la démo locale */ }
+    }
+    return demoTaken().concat(loadLocal());
+  }
+
+  function freeSlots(dateIso) {
+    const now = new Date();
+    const isToday = dateIso === iso(now);
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const result = [];
+    for (let t = OPEN.start * 60; t + service.min <= OPEN.end * 60; t += 30) {
+      if (isToday && t <= nowMin + 30) continue;
+      const clash = taken.some((b) => b.date === dateIso && t < toMin(b.heure) + b.duree && toMin(b.heure) < t + service.min);
+      if (!clash) result.push(`${pad(Math.floor(t / 60))}:${pad(t % 60)}`);
+    }
+    return result;
+  }
+
+  function renderServices() {
+    $("services").innerHTML = "";
+    SERVICES.forEach((s) => {
+      const b = document.createElement("button");
+      b.className = "pill";
+      b.setAttribute("aria-pressed", s === service);
+      b.innerHTML = `${s.name}<small>${s.min} min</small>`;
+      b.onclick = () => { service = s; slot = null; renderServices(); renderDays(); renderSlots(); };
+      $("services").append(b);
+    });
+  }
+
+  function renderDays() {
+    $("days").innerHTML = "";
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(Date.now() + i * 864e5);
+      const dIso = iso(d);
+      const closed = CLOSED_DAYS.includes(d.getDay());
+      const full = !closed && freeSlots(dIso).length === 0;
+      if (!day && !closed && !full) day = dIso;
+      const b = document.createElement("button");
+      b.className = "day";
+      b.disabled = closed || full;
+      b.setAttribute("aria-pressed", dIso === day);
+      b.innerHTML = `<span>${i === 0 ? "auj." : d.toLocaleDateString("fr-FR", { weekday: "short" })}</span><b>${d.getDate()}</b><span>${closed ? "fermé" : full ? "complet" : d.toLocaleDateString("fr-FR", { month: "short" })}</span>`;
+      b.onclick = () => { day = dIso; slot = null; renderDays(); renderSlots(); };
+      $("days").append(b);
+    }
+  }
+
+  function renderSlots() {
+    $("slots").innerHTML = "";
+    $("form").hidden = true;
+    const list = day ? freeSlots(day) : [];
+    if (!list.length) {
+      $("slots").innerHTML = '<div class="empty">Plus de créneau libre ce jour-là. Essayez le jour suivant.</div>';
+      return;
+    }
+    list.forEach((h, i) => {
+      const b = document.createElement("button");
+      b.className = "slot";
+      b.style.animationDelay = `${i * 25}ms`;
+      b.textContent = h;
+      b.setAttribute("aria-pressed", h === slot);
+      b.onclick = () => {
+        slot = h;
+        document.querySelectorAll(".slot").forEach((x) => x.setAttribute("aria-pressed", x === b));
+        const [y, m, d] = day.split("-").map(Number);
+        const dayLabel = new Date(y, m - 1, d).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+        $("recap").innerHTML = `<b>${service.name}</b> · ${dayLabel} à <b>${h}</b> · ${service.price} DA`;
+        $("form").hidden = false;
+        $("nom").focus({ preventScroll: true });
+        $("form").scrollIntoView({ behavior: "smooth", block: "center" });
+      };
+      $("slots").append(b);
+    });
+  }
+
+  let last = null;
+  $("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const booking = { date: day, heure: slot, duree: service.min };
+    const nom = $("nom").value.trim();
+    saveLocal(loadLocal().concat(booking));
+    taken.push(booking);
+    if (SCRIPT_URL) {
+      fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: new URLSearchParams({
+        nom, telephone: $("tel").value.trim(), prestation: service.name, date: day, heure: slot, source: "créneaux en ligne" }) }).catch(() => {});
+    }
+    const [y, m, d] = day.split("-").map(Number);
+    const when = new Date(y, m - 1, d).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+    const sentAt = new Date();
+    $("ok-text").textContent = `${service.name}, ${when} à ${slot}.`;
+    $("bubble").textContent = `Salon Jasmin · envoyé à ${pad(sentAt.getHours())}:${pad(sentAt.getMinutes())}\n\nBonjour ${nom.split(" ")[0]} ! Votre rendez-vous « ${service.name} » est confirmé pour ${when} à ${slot}. À bientôt 🌸`;
+    last = { ...booking, nom, name: service.name };
+    $("confirm").hidden = false;
+    e.target.reset();
+    slot = null;
+    renderDays();
+    renderSlots();
+  });
+
+  $("close").onclick = () => ($("confirm").hidden = true);
+
+  // Fichier .ics : le client ajoute le rendez-vous à son agenda en un geste.
+  $("ics").onclick = () => {
+    if (!last) return;
+    const [y, m, d] = last.date.split("-").map(Number);
+    const [h, mi] = last.heure.split(":").map(Number);
+    const start = new Date(y, m - 1, d, h, mi);
+    const end = new Date(start.getTime() + last.duree * 60000);
+    const stamp = (dt) => `${dt.getFullYear()}${pad(dt.getMonth() + 1)}${pad(dt.getDate())}T${pad(dt.getHours())}${pad(dt.getMinutes())}00`;
+    const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Salon Jasmin//FR", "BEGIN:VEVENT",
+      `UID:${Date.now()}@salon-jasmin`, `DTSTAMP:${stamp(new Date())}`, `DTSTART:${stamp(start)}`, `DTEND:${stamp(end)}`,
+      `SUMMARY:${last.name} — Salon Jasmin`, "BEGIN:VALARM", "TRIGGER:-PT2H", "ACTION:DISPLAY", "DESCRIPTION:Rendez-vous au Salon Jasmin", "END:VALARM",
+      "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
+    a.download = "rendez-vous-salon-jasmin.ics";
+    a.click();
+  };
+
+  function tick() { const n = new Date(); $("now").textContent = `${pad(n.getHours())}:${pad(n.getMinutes())}`; }
+  tick();
+  setInterval(tick, 10000);
+
+  loadTaken().then((list) => { taken = list; renderServices(); renderDays(); renderSlots(); });
+</script>
+</body>
+</html>

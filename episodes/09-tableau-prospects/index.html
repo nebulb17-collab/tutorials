@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tableau des prospects</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --brand-hover: #DA8D6E; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --track: #F6EEE7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 32px 0 12px; }
+  header small { color: var(--brand-dark); font-weight: 600; letter-spacing: 1px; font-size: 12px; }
+  h1 { font: 600 28px Fraunces, serif; margin-top: 4px; }
+  header p { color: var(--muted); margin-top: 6px; font-size: 14px; }
+  h2 { font: 600 19px Fraunces, serif; margin: 30px 0 10px; }
+
+  /* Filtres : une seule rangée, au-dessus de tout ce qu'ils filtrent */
+  .filters { display: flex; gap: 6px; margin: 8px 0 14px; flex-wrap: wrap; }
+  .filters button { border: 1.5px solid var(--line); background: var(--card); border-radius: 999px; padding: 8px 14px; font: 500 13px Inter, sans-serif; color: var(--ink); cursor: pointer; }
+  .filters button[aria-pressed=true] { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .filters .sep { width: 1px; background: var(--line); margin: 0 4px; }
+
+  .kpis { display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px; }
+  .tile .label { font-size: 12px; color: var(--muted); }
+  .tile .value { font: 600 22px Inter, sans-serif; margin-top: 4px; }
+  .tile.hero { grid-row: span 2; display: flex; flex-direction: column; justify-content: center; }
+  .tile.hero .value { font-size: 52px; line-height: 1; letter-spacing: -1.5px; }
+  .tile .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .chart { margin-top: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px 16px 10px; transition: opacity .2s; }
+  .chart h3 { font-size: 14px; font-weight: 600; }
+  .chart .note { font-size: 12px; color: var(--muted); margin: 2px 0 12px; }
+  .bars { display: grid; gap: 6px; position: relative; }
+  .bar-row { display: grid; grid-template-columns: 112px 1fr; align-items: center; gap: 10px; min-height: 32px; border-radius: 8px; outline: none; cursor: default; }
+  .bar-row:focus-visible { box-shadow: 0 0 0 2px var(--brand-dark); }
+  .bar-row .name { font-size: 13px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .track { position: relative; height: 32px; display: flex; align-items: center; }
+  .fill { height: 20px; background: var(--brand); border-radius: 0 4px 4px 0; transition: width .6s cubic-bezier(.2, .8, .2, 1), background .15s; min-width: 2px; }
+  .bar-row:hover .fill, .bar-row:focus-visible .fill { background: var(--brand-hover); }
+  .val { font-size: 13px; font-weight: 600; margin-left: 8px; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .tip { position: absolute; pointer-events: none; background: var(--ink); color: #fff; border-radius: 10px; padding: 8px 10px; font-size: 12px; line-height: 1.4;
+    opacity: 0; transform: translateY(4px); transition: opacity .12s, transform .12s; z-index: 3; max-width: calc(100% - 112px); }
+  .tip.show { opacity: 1; transform: none; }
+  .tip b { font-size: 15px; display: block; }
+  .tip span { color: #E9DCD3; }
+
+  details { margin-top: 10px; font-size: 13px; }
+  summary { cursor: pointer; color: var(--muted); padding: 6px 0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; }
+  td:not(:first-child), th:not(:first-child) { text-align: right; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 6px; }
+  label:first-child { margin-top: 0; }
+  input, select { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line); background: #fff; font: inherit; font-size: 15px; color: var(--ink); }
+  input:focus, select:focus { outline: none; border-color: var(--brand); }
+  .btn { width: 100%; margin-top: 14px; padding: 14px; border: 0; border-radius: 999px; background: var(--brand); color: #fff; font: 600 15px Inter, sans-serif; cursor: pointer; }
+  .links { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .link { display: flex; gap: 8px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 12px; }
+  .link code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); }
+  .link b { font-size: 13px; min-width: 94px; }
+  .link button { border: 0; background: var(--track); border-radius: 8px; padding: 6px 10px; font: 600 12px Inter, sans-serif; cursor: pointer; color: var(--ink); }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <small>RÉNOV' EXPRESS · TABLEAU DE BORD</small>
+    <h1>D'où viennent vos clients ?</h1>
+    <p>Chaque formulaire note sa source. Le tableau compte tout seul.</p>
+  </header>
+
+  <div class="filters" role="group" aria-label="Filtres">
+    <button data-days="7">7 jours</button>
+    <button data-days="30" aria-pressed="true">30 jours</button>
+    <button data-days="0">Tout</button>
+    <span class="sep" aria-hidden="true"></span>
+    <button data-metric="prospects" aria-pressed="true">Prospects</button>
+    <button data-metric="clients">Clients</button>
+  </div>
+
+  <div class="kpis">
+    <div class="tile hero"><div class="label" id="hero-label">Prospects</div><div class="value" id="total">0</div><div class="sub" id="period"></div></div>
+    <div class="tile"><div class="label">Meilleur canal</div><div class="value" id="best">—</div></div>
+    <div class="tile"><div class="label">Taux de conversion</div><div class="value" id="rate">—</div></div>
+  </div>
+
+  <section class="chart" id="chart" aria-labelledby="chart-title">
+    <h3 id="chart-title">Prospects par canal</h3>
+    <p class="note" id="chart-note"></p>
+    <div class="bars" id="bars">
+      <div class="tip" id="tip" role="tooltip"></div>
+    </div>
+    <details>
+      <summary>Voir le tableau</summary>
+      <table>
+        <thead><tr><th>Canal</th><th>Prospects</th><th>Clients</th><th>Conversion</th></tr></thead>
+        <tbody id="table"></tbody>
+      </table>
+    </details>
+  </section>
+
+  <h2>Testez : un nouveau prospect</h2>
+  <form class="card" id="form">
+    <label for="nom">Nom</label>
+    <input id="nom" required value="Lyes Brahimi">
+    <label for="source">Comment nous avez-vous connus ?</label>
+    <select id="source"></select>
+    <button class="btn" type="submit">Envoyer la demande</button>
+  </form>
+
+  <h2>Vos liens suivis</h2>
+  <p style="color:var(--muted);font-size:13px;margin-bottom:10px">Un lien par plateforme : la source est remplie toute seule, même si le client ne répond pas à la question.</p>
+  <div class="links" id="links"></div>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Ajoutez la question « Comment nous avez-vous connus ? » à chaque formulaire.</li>
+      <li>Utilisez un lien différent par plateforme : …?source=instagram, …?source=google.</li>
+      <li>Chaque prospect arrive dans votre tableau avec sa source.</li>
+      <li>Un tableau de bord compte les prospects par canal : vous savez où investir.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  const SITE = "https://renov-express.example/devis";
+  const STORAGE_KEY = "renov-express-prospects";
+  // Ordre fixe des canaux : la couleur et la place suivent le canal, jamais son rang.
+  const CHANNELS = ["Instagram", "Google", "Bouche-à-oreille", "Facebook", "TikTok"];
+  const $ = (id) => document.getElementById(id);
+  const DAY = 864e5;
+  // « Bouche-à-oreille » → « bouche-a-oreille »
+  const slug = (t) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z]+/g, "-").replace(/^-|-$/g, "");
+
+  // Données d'exemple déterministes sur 60 jours.
+  function sample() {
+    const weights = { "Instagram": 9, "Google": 6, "Bouche-à-oreille": 4, "Facebook": 2, "TikTok": 3 };
+    const convert = { "Instagram": .2, "Google": .35, "Bouche-à-oreille": .5, "Facebook": .15, "TikTok": .1 };
+    let seed = 7;
+    const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const list = [];
+    for (const [ch, w] of Object.entries(weights))
+      for (let i = 0; i < w * 4; i++)
+        list.push({ source: ch, date: Date.now() - Math.floor(rand() * 60) * DAY, client: rand() < convert[ch] });
+    return list;
+  }
+  function loadAdded() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
+  function saveAdded(list) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch {} }
+
+  const base = sample();
+  let added = loadAdded();
+  let days = 30, metric = "prospects";
+
+  function slice() {
+    const from = days ? Date.now() - days * DAY : 0;
+    return base.concat(added).filter((l) => l.date >= from);
+  }
+
+  function render() {
+    const leads = slice();
+    const stats = CHANNELS.map((ch) => {
+      const mine = leads.filter((l) => l.source === ch);
+      const clients = mine.filter((l) => l.client).length;
+      return { ch, prospects: mine.length, clients, rate: mine.length ? clients / mine.length : 0 };
+    });
+    const total = stats.reduce((s, x) => s + x[metric], 0);
+    const totalClients = stats.reduce((s, x) => s + x.clients, 0);
+    const best = stats.slice().sort((a, b) => b[metric] - a[metric])[0];
+    const max = Math.max(1, ...stats.map((s) => s[metric]));
+    const pct = (v) => `${Math.round(v * 100)} %`;
+
+    $("hero-label").textContent = metric === "prospects" ? "Prospects" : "Clients signés";
+    $("total").textContent = total.toLocaleString("fr-FR");
+    $("period").textContent = days ? `sur les ${days} derniers jours` : "depuis le début";
+    $("best").textContent = best[metric] ? best.ch : "—";
+    $("rate").textContent = leads.length ? pct(totalClients / leads.length) : "—";
+    $("chart-title").textContent = metric === "prospects" ? "Prospects par canal" : "Clients signés par canal";
+    $("chart-note").textContent = days ? `${days} derniers jours` : "Depuis le début";
+
+    const bars = $("bars");
+    bars.querySelectorAll(".bar-row").forEach((r) => r.remove());
+    stats.forEach((s) => {
+      const row = document.createElement("div");
+      row.className = "bar-row";
+      row.tabIndex = 0;
+      const name = document.createElement("span");
+      name.className = "name";
+      name.textContent = s.ch;
+      const track = document.createElement("div");
+      track.className = "track";
+      const fill = document.createElement("div");
+      fill.className = "fill";
+      fill.style.width = "0";
+      const val = document.createElement("span");
+      val.className = "val";
+      val.textContent = s[metric];
+      track.append(fill, val);
+      row.append(name, track);
+      row.setAttribute("aria-label", `${s.ch} : ${s[metric]} ${metric === "prospects" ? "prospects" : "clients"}`);
+      const show = () => showTip(row, s, total);
+      row.addEventListener("pointerenter", show);
+      row.addEventListener("focus", show);
+      row.addEventListener("pointerleave", hideTip);
+      row.addEventListener("blur", hideTip);
+      bars.append(row);
+      // 44px réservés au bout de la piste pour la valeur, qui ne déborde jamais.
+      requestAnimationFrame(() => (fill.style.width = `calc((100% - 44px) * ${s[metric] / max})`));
+    });
+
+    $("table").innerHTML = "";
+    stats.forEach((s) => {
+      const tr = document.createElement("tr");
+      [s.ch, s.prospects, s.clients, s.prospects ? pct(s.rate) : "—"].forEach((v) => {
+        const td = document.createElement("td");
+        td.textContent = v;
+        tr.append(td);
+      });
+      $("table").append(tr);
+    });
+  }
+
+  function showTip(row, s, total) {
+    const tip = $("tip");
+    const value = s[metric];
+    tip.innerHTML = "<b></b><span></span>";
+    tip.querySelector("b").textContent = `${value} ${metric === "prospects" ? "prospect" : "client"}${value > 1 ? "s" : ""}`;
+    tip.querySelector("span").textContent = `${s.ch} · ${total ? Math.round((value / total) * 100) : 0} % du total · conversion ${s.prospects ? Math.round(s.rate * 100) : 0} %`;
+    tip.style.top = `${row.offsetTop - 50}px`;
+    tip.style.left = "112px";
+    tip.classList.add("show");
+  }
+  function hideTip() { $("tip").classList.remove("show"); }
+
+  document.querySelectorAll(".filters button").forEach((b) => {
+    b.onclick = () => {
+      const key = b.dataset.days !== undefined ? "days" : "metric";
+      document.querySelectorAll(`.filters button[data-${key}]`).forEach((x) => x.setAttribute("aria-pressed", x === b));
+      if (key === "days") days = Number(b.dataset.days); else metric = b.dataset.metric;
+      $("chart").style.opacity = .5;
+      setTimeout(() => { render(); $("chart").style.opacity = 1; }, 120);
+    };
+  });
+
+  CHANNELS.forEach((ch) => $("source").append(new Option(ch)));
+  // ?source=instagram dans l'adresse → la source est déjà choisie.
+  const fromUrl = slug(new URLSearchParams(location.search).get("source") || "");
+  const match = fromUrl && CHANNELS.find((c) => slug(c).startsWith(fromUrl));
+  if (match) $("source").value = match;
+
+  $("form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    added.push({ source: $("source").value, date: Date.now(), client: false });
+    saveAdded(added);
+    render();
+    $("chart").scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+
+  CHANNELS.forEach((ch) => {
+    const url = `${SITE}?source=${slug(ch)}`;
+    const row = document.createElement("div");
+    row.className = "link";
+    row.innerHTML = "<b></b><code></code><button type='button'>Copier</button>";
+    row.querySelector("b").textContent = ch;
+    row.querySelector("code").textContent = url;
+    row.querySelector("button").onclick = (ev) => {
+      navigator.clipboard?.writeText(url).then(() => { ev.target.textContent = "Copié ✓"; setTimeout(() => (ev.target.textContent = "Copier"), 1500); }).catch(() => {});
+    };
+    $("links").append(row);
+  });
+
+  render();
+</script>
+</body>
+</html>

@@ -1,11 +1,18 @@
 // Les infos de chaque commerce vivent ici, côté serveur : la page ne peut pas les modifier,
 // et l'IA ne répond qu'à partir de ce texte. Remplacez par les vraies infos du client.
 
+export interface Article {
+  id: string;
+  nom: string;
+}
+
 export interface Commerce {
   nom: string;
   whatsapp: string;
   signature: string;
   infos: string;
+  /** Carte du commerce pour l'agent de commande (épisode 22). Les prix restent dans la page. */
+  menu?: Article[];
 }
 
 export const COMMERCES: Record<string, Commerce> = {
@@ -37,6 +44,36 @@ Annulation : gratuite jusqu'à la veille, merci de prévenir.
 Restaurant méditerranéen familial à Oran, cuisine maison, terrasse ombragée.
 Horaires : tous les jours de 12h à 15h et de 19h à 23h.
 Réservation conseillée le week-end. Livraison via WhatsApp dans un rayon de 5 km.
+`.trim(),
+  },
+  "cafe-lumiere": {
+    nom: "Café Lumière",
+    whatsapp: "+213 000 000 000",
+    signature: "L'équipe du Café Lumière",
+    infos: `
+Café de quartier, torréfaction maison, pâtisseries cuites chaque matin.
+Ouvert tous les jours de 7h à 20h. Commandes à emporter, prêtes à l'heure demandée.
+Ton de la marque : chaleureux, simple, gourmand, jamais pompeux.
+`.trim(),
+    menu: [
+      { id: "espresso", nom: "Espresso" },
+      { id: "cappuccino", nom: "Cappuccino" },
+      { id: "latte-miel", nom: "Latte miel & cannelle" },
+      { id: "latte-pistache", nom: "Latte pistache" },
+      { id: "croissant", nom: "Croissant au beurre" },
+      { id: "cheesecake", nom: "Cheesecake" },
+      { id: "jus-orange", nom: "Jus d'orange pressé" },
+    ],
+  },
+  "studio-nour": {
+    nom: "Studio Nour",
+    whatsapp: "+213 000 000 000",
+    signature: "Nour, Studio Nour",
+    infos: `
+Photographe de mariages et d'événements basé à Alger, se déplace dans tout le pays.
+Style : lumière naturelle, images spontanées, retouches douces et intemporelles.
+Livraison : galerie privée en ligne sous 3 semaines, photos en haute définition.
+Réservation de la date avec un acompte de 30 %, le solde le jour de l'événement.
 `.trim(),
   },
 };

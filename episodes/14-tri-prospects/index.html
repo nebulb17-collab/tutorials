@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rénov' Express — Tri des demandes</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --soft: #FBEDE6;
+    --hot: #C2410C; --hot-bg: #FFEDD5; --warm: #A16207; --warm-bg: #FEF3C7; --cold: #2F5E8C; --cold-bg: #E3ECF6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 28px 0 10px; }
+  header small { color: var(--brand-dark); font-weight: 600; letter-spacing: 1px; font-size: 12px; }
+  h1 { font: 600 27px Fraunces, serif; margin-top: 4px; }
+  header p { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+  .bar { position: sticky; top: 0; z-index: 3; background: var(--bg); padding: 10px 0; display: flex; gap: 8px; align-items: center; }
+  .bar button { padding: 13px 14px; border: 0; border-radius: 999px; background: var(--brand); color: #fff; font: 600 14px Inter, sans-serif; cursor: pointer; }
+  .bar button.ghost { background: var(--card); color: var(--ink); border: 1.5px solid var(--line); }
+  .bar button:disabled { opacity: .45; cursor: default; }
+  .bar .count { margin-left: auto; font-size: 12px; color: var(--muted); text-align: right; }
+  .bar .count b { display: block; font-size: 18px; color: var(--ink); }
+
+  .lane { margin-top: 14px; }
+  .lane h2 { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .lane h2 .n { margin-left: auto; font-size: 12px; border-radius: 999px; padding: 2px 9px; }
+  .lane.hot h2 .n { background: var(--hot-bg); color: var(--hot); }
+  .lane.warm h2 .n { background: var(--warm-bg); color: var(--warm); }
+  .lane.cold h2 .n { background: var(--cold-bg); color: var(--cold); }
+  .lane .empty { font-size: 13px; color: var(--muted); background: var(--card); border: 1px dashed var(--line); border-radius: 14px; padding: 12px; text-align: center; }
+
+  .lead { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; margin-bottom: 8px; animation: drop .5s cubic-bezier(.2, .9, .3, 1.2); }
+  @keyframes drop { from { transform: translateY(-16px) scale(.97); opacity: 0; } }
+  .lane.hot .lead { border-left: 4px solid var(--hot); }
+  .lane.warm .lead { border-left: 4px solid #E2A23B; }
+  .lane.cold .lead { border-left: 4px solid var(--cold); }
+  .top { display: flex; align-items: center; gap: 10px; }
+  .score { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 15px; flex-shrink: 0;
+    background: conic-gradient(var(--c) calc(var(--p) * 1%), var(--line) 0); position: relative; }
+  .score::before { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: var(--card); }
+  .score span { position: relative; }
+  .lane.hot .score { --c: var(--hot); } .lane.warm .score { --c: #E2A23B; } .lane.cold .score { --c: var(--cold); }
+  .who b { display: block; font-size: 15px; }
+  .who small { color: var(--muted); font-size: 12px; }
+  .why { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+  .why span { font-size: 11px; background: var(--bg); border-radius: 999px; padding: 3px 8px; color: var(--muted); }
+  .why span b { color: var(--ink); }
+  .next { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; font-size: 13px; }
+  .next a { text-decoration: none; background: var(--ink); color: #fff; border-radius: 999px; padding: 8px 12px; font-weight: 600; font-size: 12px; white-space: nowrap; }
+
+  .grid { margin-top: 28px; background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 16px; }
+  .grid h3 { font: 600 18px Fraunces, serif; }
+  .grid p { color: var(--muted); font-size: 13px; margin: 4px 0 10px; }
+  .grid table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .grid td { padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .grid td:last-child { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .grid td.crit { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .6px; padding-top: 12px; border-bottom: 0; }
+  .seuils { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .seuils label { font-size: 12px; font-weight: 600; }
+  .seuils input { width: 100%; accent-color: var(--brand); margin-top: 6px; }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <small>RÉNOV' EXPRESS · DEMANDES DE DEVIS</small>
+    <h1>Qui rappeler en premier ?</h1>
+    <p>Chaque demande reçoit une note sur 100 et se range toute seule.</p>
+  </header>
+
+  <div class="bar">
+    <button id="one">📥 Nouvelle demande</button>
+    <button class="ghost" id="all">Tout trier</button>
+    <div class="count"><b id="done">0</b>sur <span id="total"></span></div>
+  </div>
+
+  <section class="lane hot"><h2>🔥 Chaud · à rappeler maintenant<span class="n" id="n-hot">0</span></h2><div id="hot"></div></section>
+  <section class="lane warm"><h2>🌤️ Tiède · devis type aujourd'hui<span class="n" id="n-warm">0</span></h2><div id="warm"></div></section>
+  <section class="lane cold"><h2>❄️ Froid · relance dans un mois<span class="n" id="n-cold">0</span></h2><div id="cold"></div></section>
+
+  <section class="grid" aria-labelledby="grid-title">
+    <h3 id="grid-title">La grille de points</h3>
+    <p>Vos règles, pas celles d'une IA : chaque point s'explique.</p>
+    <table><tbody id="rules"></tbody></table>
+    <div class="seuils">
+      <label>Chaud à partir de <b id="v-hot"></b><input type="range" id="s-hot" min="50" max="90" step="5" value="70"></label>
+      <label>Froid en dessous de <b id="v-cold"></b><input type="range" id="s-cold" min="20" max="60" step="5" value="40"></label>
+    </div>
+  </section>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Listez ce qui fait un bon client pour vous : budget, délai, taille du chantier.</li>
+      <li>Donnez des points à chaque réponse du formulaire, pour un total sur 100.</li>
+      <li>Chaque nouvelle demande est notée et rangée toute seule : chaud, tiède, froid.</li>
+      <li>Vous rappelez les chauds d'abord. Les autres reçoivent le bon message au bon moment.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  // La grille : mêmes réponses que le formulaire de devis de l'épisode 7 (et que score.gs).
+  const GRILLE = {
+    budget: { titre: "Budget", points: { "Plus de 1 500 000 DA": 30, "500 000 – 1 500 000 DA": 25, "150 000 – 500 000 DA": 15, "Moins de 150 000 DA": 5 } },
+    delai: { titre: "Délai", points: { "Dès que possible": 25, "Dans le mois": 20, "Dans 3 mois": 10, "Je me renseigne": 0 } },
+    surface: { titre: "Surface", points: { "30 m² et plus": 15, "10 à 29 m²": 10, "Moins de 10 m²": 5 } },
+    contact: { titre: "Coordonnées", points: { "Téléphone + email": 10, "Téléphone seul": 7, "Email seul": 3 } },
+    details: { titre: "Projet décrit", points: { "Description détaillée": 10, "Quelques mots": 5, "Rien": 0 } },
+    source: { titre: "Source", points: { "Bouche-à-oreille": 10, "Google": 8, "Instagram": 5, "Facebook": 5, "TikTok": 3 } },
+  };
+  const LEADS = [
+    { nom: "Karim Ouali", tel: "0550 12 34 56", email: "karim@exemple.dz", travaux: "Salle de bain", surface: 12, budget: "150 000 – 500 000 DA", delai: "Dès que possible", details: "Refaire la salle de bain : douche italienne, faïence et meuble double vasque.", source: "Instagram" },
+    { nom: "Samia Larbi", tel: "0661 98 76 54", email: "", travaux: "Cuisine", surface: 18, budget: "500 000 – 1 500 000 DA", delai: "Dans le mois", details: "Cuisine ouverte avec îlot.", source: "Google" },
+    { nom: "Hakim B.", tel: "", email: "hakim@exemple.dz", travaux: "Peinture", surface: 8, budget: "Moins de 150 000 DA", delai: "Je me renseigne", details: "", source: "TikTok" },
+    { nom: "Famille Meziane", tel: "0770 11 22 33", email: "meziane@exemple.dz", travaux: "Rénovation complète", surface: 95, budget: "Plus de 1 500 000 DA", delai: "Dans 3 mois", details: "Appartement F4 acheté récemment : électricité, sols, cuisine et deux salles d'eau à refaire.", source: "Bouche-à-oreille" },
+    { nom: "Nadia T.", tel: "0552 00 11 22", email: "", travaux: "Peinture", surface: 40, budget: "150 000 – 500 000 DA", delai: "Dans le mois", details: "Peinture de tout l'appartement.", source: "Facebook" },
+    { nom: "Omar Z.", tel: "0699 45 45 45", email: "omar@exemple.dz", travaux: "Salle de bain", surface: 6, budget: "Moins de 150 000 DA", delai: "Dans 3 mois", details: "", source: "Instagram" },
+    { nom: "Lyes Brahimi", tel: "0551 33 44 55", email: "lyes@exemple.dz", travaux: "Cuisine", surface: 14, budget: "500 000 – 1 500 000 DA", delai: "Dès que possible", details: "Cuisine équipée complète, plan de travail en quartz, livraison avant le Ramadan si possible.", source: "Google" },
+    { nom: "Inès K.", tel: "", email: "ines@exemple.dz", travaux: "Rénovation complète", surface: 60, budget: "150 000 – 500 000 DA", delai: "Je me renseigne", details: "Quelques idées pour un F3.", source: "Instagram" },
+  ];
+  const ACTIONS = {
+    hot: { texte: "Appeler dans l'heure", bouton: "📞 Appeler" },
+    warm: { texte: "Envoyer le devis type aujourd'hui", bouton: "💬 WhatsApp" },
+    cold: { texte: "Relance automatique dans 1 mois", bouton: "💬 Message" },
+  };
+
+  const $ = (id) => document.getElementById(id);
+  let seuilChaud = 70, seuilFroid = 40, arrives = 0;
+
+  function reponses(l) {
+    return {
+      budget: l.budget, delai: l.delai, source: l.source,
+      surface: l.surface >= 30 ? "30 m² et plus" : l.surface >= 10 ? "10 à 29 m²" : "Moins de 10 m²",
+      contact: l.tel && l.email ? "Téléphone + email" : l.tel ? "Téléphone seul" : "Email seul",
+      details: l.details.length >= 60 ? "Description détaillée" : l.details.length >= 20 ? "Quelques mots" : "Rien",
+    };
+  }
+  function noter(l) {
+    const r = reponses(l);
+    const detail = Object.entries(r).map(([k, v]) => ({ titre: GRILLE[k].titre, points: GRILLE[k].points[v] ?? 0 }));
+    return { total: detail.reduce((s, d) => s + d.points, 0), detail };
+  }
+  const temperature = (score) => (score >= seuilChaud ? "hot" : score < seuilFroid ? "cold" : "warm");
+
+  function card(l) {
+    const { total, detail } = noter(l);
+    const t = temperature(total);
+    const el = document.createElement("article");
+    el.className = "lead";
+    el.innerHTML = `
+      <div class="top">
+        <div class="score" style="--p:${total}"><span>${total}</span></div>
+        <div class="who"><b></b><small></small></div>
+      </div>
+      <div class="why"></div>
+      <div class="next"><span>${ACTIONS[t].texte}</span><a target="_blank" rel="noopener">${ACTIONS[t].bouton}</a></div>`;
+    el.querySelector("b").textContent = l.nom;
+    el.querySelector("small").textContent = `${l.travaux} · ${l.surface} m² · ${l.budget} · ${l.delai}`;
+    detail.forEach((d) => {
+      const s = document.createElement("span");
+      s.innerHTML = `${d.titre} <b>+${d.points}</b>`;
+      el.querySelector(".why").append(s);
+    });
+    const num = l.tel.replace(/\D/g, "").replace(/^0/, "213");
+    const prenom = l.nom.split(" ")[0];
+    const a = el.querySelector("a");
+    if (t === "hot" && num) a.href = `tel:+${num}`;
+    else if (num) a.href = `https://wa.me/${num}?text=${encodeURIComponent(
+      t === "warm" ? `Bonjour ${prenom}, ici Rénov' Express. Merci pour votre demande (${l.travaux.toLowerCase()}, ${l.surface} m²). Je vous envoie une première estimation aujourd'hui. Vous êtes disponible pour une visite cette semaine ?`
+                   : `Bonjour ${prenom}, ici Rénov' Express. Merci pour votre demande. Quand votre projet sera plus avancé, je serai ravi de passer le voir 🙂`)}`;
+    else a.href = `mailto:${l.email}?subject=${encodeURIComponent(`Votre projet ${l.travaux.toLowerCase()}`)}`;
+    return { el, t };
+  }
+
+  function render() {
+    ["hot", "warm", "cold"].forEach((t) => ($(t).innerHTML = ""));
+    const counts = { hot: 0, warm: 0, cold: 0 };
+    LEADS.slice(0, arrives)
+      .map((l) => ({ l, score: noter(l).total }))
+      .sort((a, b) => b.score - a.score)
+      .forEach(({ l }) => { const { el, t } = card(l); counts[t]++; $(t).append(el); });
+    ["hot", "warm", "cold"].forEach((t) => {
+      $(`n-${t}`).textContent = counts[t];
+      if (!counts[t]) $(t).innerHTML = '<div class="empty">Aucune demande ici pour l\'instant</div>';
+    });
+    $("done").textContent = arrives;
+    $("one").disabled = $("all").disabled = arrives >= LEADS.length;
+  }
+
+  function renderRules() {
+    $("rules").innerHTML = "";
+    Object.values(GRILLE).forEach((c) => {
+      const max = Math.max(...Object.values(c.points));
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td class="crit" colspan="2"></td>`;
+      tr.firstChild.textContent = `${c.titre} · jusqu'à ${max} pts`;
+      $("rules").append(tr);
+      Object.entries(c.points).forEach(([k, v]) => {
+        const row = document.createElement("tr");
+        row.innerHTML = "<td></td><td></td>";
+        row.children[0].textContent = k;
+        row.children[1].textContent = `${v} pts`;
+        $("rules").append(row);
+      });
+    });
+    $("v-hot").textContent = seuilChaud;
+    $("v-cold").textContent = seuilFroid;
+  }
+
+  $("total").textContent = LEADS.length;
+  $("one").onclick = () => { arrives = Math.min(LEADS.length, arrives + 1); render(); };
+  $("all").onclick = () => {
+    const tick = () => { if (arrives < LEADS.length) { arrives++; render(); setTimeout(tick, 450); } };
+    tick();
+  };
+  $("s-hot").oninput = (e) => { seuilChaud = Math.max(Number(e.target.value), seuilFroid + 5); renderRules(); render(); };
+  $("s-cold").oninput = (e) => { seuilFroid = Math.min(Number(e.target.value), seuilChaud - 5); renderRules(); render(); };
+  renderRules();
+  render();
+</script>
+</body>
+</html>

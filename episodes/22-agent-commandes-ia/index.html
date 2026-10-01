@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Café Lumière — Agent de commande</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --soft: #FBEDE6; --ok: #1E7A42;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 24px 0 12px; display: flex; align-items: center; gap: 12px; }
+  .logo { width: 44px; height: 44px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; font: 600 22px Fraunces, serif; flex-shrink: 0; }
+  h1 { font: 600 23px Fraunces, serif; }
+  header p { color: var(--muted); font-size: 13px; }
+
+  .chat { background: var(--card); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; height: min(430px, 56vh); }
+  .log { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .msg { max-width: 84%; padding: 9px 13px; border-radius: 16px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; animation: in .25s ease-out; }
+  @keyframes in { from { transform: translateY(6px); opacity: 0; } }
+  .bot { background: var(--bg); border-bottom-left-radius: 4px; align-self: flex-start; }
+  .me { background: var(--brand); color: #fff; border-bottom-right-radius: 4px; align-self: flex-end; }
+  .ok-msg { background: #E6F4EA; color: var(--ok); font-weight: 600; align-self: center; text-align: center; }
+  .chips { display: flex; gap: 6px; overflow-x: auto; padding: 0 12px 8px; }
+  .chips button { flex-shrink: 0; border: 1.5px solid var(--line); background: var(--card); border-radius: 999px; padding: 7px 11px; font: 500 12px Inter, sans-serif; cursor: pointer; color: var(--ink); }
+  .chat form { display: flex; gap: 6px; padding: 8px 10px 10px; border-top: 1px solid var(--line); }
+  .chat input { flex: 1; min-width: 0; padding: 11px 13px; border-radius: 999px; border: 1.5px solid var(--line); font: inherit; font-size: 15px; }
+  .chat input:focus { outline: none; border-color: var(--brand); }
+  .chat form button { width: 44px; border: 0; border-radius: 50%; background: var(--brand); color: #fff; font-size: 17px; cursor: pointer; }
+
+  .order { margin-top: 12px; background: var(--ink); color: #fff; border-radius: 22px; padding: 16px; }
+  .order h2 { font: 600 18px Fraunces, serif; display: flex; align-items: center; gap: 8px; }
+  .order h2 span { margin-left: auto; font: 600 18px Inter, sans-serif; font-variant-numeric: tabular-nums; }
+  .lines { list-style: none; margin-top: 10px; display: grid; gap: 6px; font-size: 14px; }
+  .lines li { display: flex; justify-content: space-between; gap: 8px; animation: in .3s; }
+  .lines li.none { color: #E9DCD3; font-size: 13px; }
+  .meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+  .meta span { font-size: 12px; border-radius: 999px; padding: 4px 10px; background: #ffffff1c; }
+  .meta span.miss { background: #CF765240; color: #FFD7C6; }
+  .meta span.got { background: #1E7A4240; color: #A7E3BC; }
+  .confirm { display: block; width: 100%; margin-top: 14px; padding: 14px; border: 0; border-radius: 999px; background: #25D366; color: #fff; font: 600 15px Inter, sans-serif; cursor: pointer; text-align: center; text-decoration: none; }
+  .confirm[aria-disabled=true] { background: #ffffff26; color: #E9DCD3; pointer-events: none; }
+
+  details { margin-top: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; }
+  summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+  pre { margin-top: 10px; font: 12px/1.5 ui-monospace, Menlo, monospace; background: var(--bg); border-radius: 10px; padding: 10px; white-space: pre-wrap; color: var(--ink); }
+
+  .steps { margin-top: 40px; background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand-dark); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">L</div>
+    <div><h1>Café Lumière</h1><p>Commandez comme vous parlez. On prépare, vous passez prendre.</p></div>
+  </header>
+
+  <section class="chat" aria-label="Commande avec l'agent">
+    <div class="log" id="log" aria-live="polite"></div>
+    <div class="chips" id="chips"></div>
+    <form id="form">
+      <input id="input" autocomplete="off" maxlength="300" placeholder="Ex. 2 cappu et un croissant pour 8h30" aria-label="Votre message">
+      <button aria-label="Envoyer">➤</button>
+    </form>
+  </section>
+
+  <section class="order" aria-label="Votre commande">
+    <h2>🧾 Votre commande <span id="total">0 DA</span></h2>
+    <ul class="lines" id="lines"></ul>
+    <div class="meta" id="meta"></div>
+    <a class="confirm" id="confirm" aria-disabled="true" target="_blank" rel="noopener">Confirmer et envoyer au café</a>
+  </section>
+
+  <details>
+    <summary>Ce que l'agent a compris</summary>
+    <pre id="state"></pre>
+  </details>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Donnez votre carte à l'agent, et ce qu'il doit obtenir : produits, heure, prénom.</li>
+      <li>Le client écrit comme il parle : l'agent comprend et remplit la commande.</li>
+      <li>Il manque quelque chose ? L'agent pose une seule question.</li>
+      <li>Tout est bon : la commande, prête à préparer, arrive sur votre WhatsApp.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  // Adresse du serveur IA (outils/ia-worker). Vide = agent de démo par mots-clés, sans IA.
+  const AI_ENDPOINT = "";
+  const WHATSAPP = "213000000000";
+  const OUVERTURE = 7 * 60, FERMETURE = 20 * 60;
+  const MENU = [
+    { id: "espresso", nom: "Espresso", prix: 150, mots: ["espresso", "expresso", "express", "cafe noir", "petit noir"] },
+    { id: "cappuccino", nom: "Cappuccino", prix: 250, mots: ["cappuccino", "cappucino", "capuccino", "cappu", "capu"] },
+    { id: "latte-miel", nom: "Latte miel & cannelle", prix: 300, mots: ["latte miel", "miel", "cannelle"] },
+    { id: "latte-pistache", nom: "Latte pistache", prix: 320, mots: ["latte pistache", "pistache"] },
+    { id: "croissant", nom: "Croissant au beurre", prix: 120, mots: ["croissant"] },
+    { id: "cheesecake", nom: "Cheesecake", prix: 350, mots: ["cheesecake", "cheese cake"] },
+    { id: "jus-orange", nom: "Jus d'orange pressé", prix: 200, mots: ["jus d'orange", "jus d orange", "jus orange", "jus"] },
+  ];
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => n.toLocaleString("fr-FR").replace(/ /g, " ") + " DA";
+  const byId = Object.fromEntries(MENU.map((m) => [m.id, m]));
+
+  let etat = { articles: [], heure_retrait: null, prenom: null, remarque: null, complet: false };
+  const historique = [];
+
+  // ---------- Agent de démo (sans IA) : règles simples, à partir de la même carte ----------
+  const NOMBRES = { un: 1, une: 1, deux: 2, trois: 3, quatre: 4, cinq: 5, six: 6 };
+  const norm = (t) => t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[’']/g, "'");
+
+  function agentDemo(message) {
+    const t = norm(message);
+    const next = { ...etat, articles: etat.articles.map((a) => ({ ...a })) };
+    const ajout = /\b(ajoute|ajouter|rajoute|aussi|en plus|et un|et une)\b/.test(t);
+    let trouve = false;
+
+    MENU.forEach((m) => {
+      for (const mot of m.mots) {
+        const idx = t.search(new RegExp(`(^|[^a-z])${mot.replace(/ /g, "\\s+")}`));
+        if (idx < 0) continue;
+        trouve = true;
+        const avant = t.slice(Math.max(0, idx - 30), idx + 1);
+        const retire = /(pas de|sans|enleve|retire|annule|plus de)\s*(\w+\s+)?$/.test(avant);
+        const q = avant.match(/(\d+|un|une|deux|trois|quatre|cinq|six)\s+(\w+\s+)?$/);
+        const qte = q ? (NOMBRES[q[1]] || Number(q[1])) : 1;
+        const ligne = next.articles.find((a) => a.id === m.id);
+        if (retire) next.articles = next.articles.filter((a) => a.id !== m.id);
+        else if (ligne) ligne.quantite = ajout ? ligne.quantite + qte : qte;
+        else next.articles.push({ id: m.id, quantite: qte });
+        break;
+      }
+    });
+
+    const h = t.match(/\b(\d{1,2})\s*(?:h|:)\s*(\d{2})?\b/) || (/\bmidi\b/.test(t) && ["", "12", "00"]);
+    let horsHoraires = false;
+    if (h) {
+      const min = Number(h[1]) * 60 + Number(h[2] || 0);
+      if (min >= OUVERTURE && min <= FERMETURE - 15) next.heure_retrait = `${String(h[1]).padStart(2, "0")}:${h[2] || "00"}`;
+      else horsHoraires = true;
+    }
+    const p = message.match(/(?:c'est pour|c’est pour|au nom de|je m'appelle|je m’appelle|moi c'est|moi c’est|prénom\s*:?)\s+([A-Za-zÀ-ÿ-]{2,})/i)
+      || message.match(/\bpour\s+([A-ZÀ-Ý][a-zà-ÿ-]+)/);
+    if (p && !MENU.some((m) => m.mots.includes(norm(p[1])))) next.prenom = p[1].charAt(0).toUpperCase() + p[1].slice(1);
+    const r = t.match(/\b(sans sucre|lait d'avoine|lait d avoine|bien chaud|sans lactose|a emporter|extra chaud)\b/);
+    if (r) next.remarque = r[1].replace("lait d avoine", "lait d'avoine").replace("a emporter", "à emporter");
+
+    next.complet = next.articles.length > 0 && Boolean(next.heure_retrait) && Boolean(next.prenom);
+    let reponse;
+    if (horsHoraires) reponse = "Le café est ouvert de 7h à 20h : à quelle heure entre les deux voulez-vous passer ?";
+    else if (!next.articles.length) reponse = trouve ? "C'est retiré. Qu'est-ce qui vous ferait plaisir à la place ?" : "Je n'ai pas trouvé ça sur notre carte. Nous avons des cafés, des lattes, des croissants, du cheesecake et du jus d'orange pressé 🙂";
+    else if (!next.heure_retrait) reponse = "C'est noté ! Pour quelle heure je vous le prépare ?";
+    else if (!next.prenom) reponse = "Parfait. C'est à quel prénom ?";
+    else reponse = `Parfait ${next.prenom} ! ${resume(next)}, prêt pour ${heureTxt(next.heure_retrait)}. Appuyez sur « Confirmer » et c'est parti.`;
+    return { ...next, reponse };
+  }
+
+  function resume(e) {
+    return e.articles.map((a) => `${a.quantite} × ${byId[a.id].nom}`).join(", ").replace(/, ([^,]*)$/, " et $1");
+  }
+  const heureTxt = (h) => h.replace(/^0/, "").replace(":", "h");
+
+  // ---------- Agent IA (serveur) ----------
+  async function agentIA() {
+    const res = await fetch(AI_ENDPOINT, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode: "commande", commerce: "cafe-lumiere", historique: historique.slice(-10) }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.resultat) throw new Error(data.erreur || "Erreur");
+    const r = data.resultat;
+    // On ne garde que ce qui existe sur la carte, avec des quantités raisonnables.
+    r.articles = (r.articles || []).filter((a) => byId[a.id]).map((a) => ({ id: a.id, quantite: Math.max(1, Math.min(20, Math.round(a.quantite) || 1)) }));
+    if (r.heure_retrait && !/^\d{2}:\d{2}$/.test(r.heure_retrait)) r.heure_retrait = null;
+    r.complet = r.articles.length > 0 && Boolean(r.heure_retrait) && Boolean(r.prenom);
+    return r;
+  }
+
+  // ---------- Affichage ----------
+  function say(text, who) {
+    const el = document.createElement("div");
+    el.className = `msg ${who}`;
+    el.textContent = text;
+    $("log").append(el);
+    $("log").scrollTop = $("log").scrollHeight;
+    return el;
+  }
+
+  function renderOrder() {
+    const total = etat.articles.reduce((s, a) => s + byId[a.id].prix * a.quantite, 0);
+    $("total").textContent = fmt(total);
+    $("lines").innerHTML = etat.articles.length ? "" : '<li class="none">Rien pour l\'instant. Écrivez ce qui vous ferait plaisir.</li>';
+    etat.articles.forEach((a) => {
+      const li = document.createElement("li");
+      li.innerHTML = "<span></span><span></span>";
+      li.children[0].textContent = `${a.quantite} × ${byId[a.id].nom}`;
+      li.children[1].textContent = fmt(byId[a.id].prix * a.quantite);
+      $("lines").append(li);
+    });
+    $("meta").innerHTML = "";
+    [["🕗", etat.heure_retrait ? `Retrait ${heureTxt(etat.heure_retrait)}` : "Heure ?"], ["👤", etat.prenom || "Prénom ?"]].forEach(([ico, txt]) => {
+      const s = document.createElement("span");
+      s.className = txt.endsWith("?") ? "miss" : "got";
+      s.textContent = `${ico} ${txt}`;
+      $("meta").append(s);
+    });
+    if (etat.remarque) $("meta").append(Object.assign(document.createElement("span"), { className: "got", textContent: `📝 ${etat.remarque}` }));
+    $("confirm").setAttribute("aria-disabled", !etat.complet);
+    const lignes = etat.articles.map((a) => `• ${a.quantite} × ${byId[a.id].nom}`).join("\n");
+    $("confirm").href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
+      `🧾 Commande à emporter — Café Lumière\n${lignes}\nRetrait : ${etat.heure_retrait || "?"}\nPrénom : ${etat.prenom || "?"}${etat.remarque ? `\nRemarque : ${etat.remarque}` : ""}\nTotal : ${fmt(total)}`)}`;
+    $("state").textContent = JSON.stringify({ articles: etat.articles, heure_retrait: etat.heure_retrait, prenom: etat.prenom, remarque: etat.remarque, complet: etat.complet }, null, 2);
+  }
+
+  let busy = false;
+  async function send(text) {
+    text = text.trim();
+    if (!text || busy) return;
+    busy = true;
+    say(text, "me");
+    historique.push({ role: "user", content: text });
+    const typing = say("…", "bot");
+    const t0 = Date.now();
+    let r;
+    try { r = AI_ENDPOINT ? await agentIA() : agentDemo(text); } catch { r = agentDemo(text); }
+    await new Promise((ok) => setTimeout(ok, Math.max(0, 650 - (Date.now() - t0))));
+    etat = { articles: r.articles, heure_retrait: r.heure_retrait, prenom: r.prenom, remarque: r.remarque, complet: r.complet };
+    typing.textContent = r.reponse;
+    historique.push({ role: "assistant", content: r.reponse });
+    renderOrder();
+    busy = false;
+  }
+
+  $("confirm").addEventListener("click", () => {
+    if (!etat.complet) return;
+    say(`Commande envoyée au café ✅ Elle sera prête à ${heureTxt(etat.heure_retrait)}, ${etat.prenom}.`, "ok-msg");
+  });
+
+  ["2 cappu et un croissant pour 8h30", "Ajoute un jus d'orange", "C'est pour Sami", "Finalement pas de croissant"].forEach((q) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = q;
+    b.onclick = () => send(q);
+    $("chips").append(b);
+  });
+  $("form").addEventListener("submit", (e) => { e.preventDefault(); const v = $("input").value; $("input").value = ""; send(v); });
+
+  say("Bonjour ☀️ Dites-moi ce qui vous ferait plaisir et à quelle heure vous passez : je prépare tout.", "bot");
+  renderOrder();
+</script>
+</body>
+</html>

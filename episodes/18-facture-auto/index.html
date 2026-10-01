@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studio Nour — Facture</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --soft: #FBEDE6; --ok: #1E7A42; --late: #B3261E;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 28px 0 12px; }
+  header small { color: var(--brand-dark); font-weight: 600; letter-spacing: 1px; font-size: 12px; }
+  h1 { font: 600 27px Fraunces, serif; margin-top: 4px; }
+  h2 { font: 600 19px Fraunces, serif; margin: 26px 0 10px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 16px; }
+  label, .label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 6px; }
+  label:first-child { margin-top: 0; }
+  input, select { width: 100%; padding: 11px 13px; border-radius: 12px; border: 1.5px solid var(--line); background: #fff; font: inherit; font-size: 15px; color: var(--ink); }
+  input:focus, select:focus { outline: none; border-color: var(--brand); }
+  .row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+  .items { display: grid; gap: 6px; }
+  .item { display: grid; grid-template-columns: 1fr auto 64px; gap: 8px; align-items: center; font-size: 14px; }
+  .item input { padding: 8px; text-align: center; }
+  .item b { white-space: nowrap; font-variant-numeric: tabular-nums; font-size: 13px; }
+  .btn { display: flex; justify-content: center; align-items: center; gap: 6px; width: 100%; margin-top: 14px; padding: 15px; border: 0; border-radius: 999px; background: var(--brand); color: #fff; font: 600 15px Inter, sans-serif; cursor: pointer; text-decoration: none; }
+  .btn:hover { background: var(--brand-dark); }
+  .btn.ghost { background: var(--card); color: var(--ink); border: 1.5px solid var(--line); }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .actions .btn { margin-top: 10px; }
+
+  #inv { margin-top: 20px; background: #fff; border-radius: 6px; box-shadow: 0 30px 60px -30px #6b3a2470, 0 0 0 1px var(--line); padding: 24px 20px; display: none; font-size: 13px; }
+  #inv.show { display: block; animation: rise .45s ease-out; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+  .inv-head { display: flex; justify-content: space-between; gap: 12px; }
+  .mark { font: 600 21px Fraunces, serif; }
+  .mark span { color: var(--brand); }
+  .inv-head .meta { text-align: right; line-height: 1.6; color: var(--muted); font-size: 12px; }
+  .inv-head .meta b { color: var(--ink); font-size: 16px; display: block; }
+  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0; line-height: 1.5; }
+  .parties small { color: var(--muted); text-transform: uppercase; letter-spacing: .8px; font-size: 10px; display: block; }
+  #inv table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  #inv th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); padding: 6px 0; border-bottom: 2px solid var(--brand); }
+  #inv td { padding: 8px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  #inv th:not(:first-child), #inv td:not(:first-child) { text-align: right; padding-left: 8px; white-space: nowrap; }
+  .totals { margin-left: auto; width: 70%; margin-top: 10px; }
+  .totals div { display: flex; justify-content: space-between; padding: 4px 0; }
+  .totals .due { font-weight: 700; font-size: 16px; border-top: 2px solid var(--ink); margin-top: 4px; padding-top: 8px; }
+  .pay { display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: center; margin-top: 18px; background: var(--bg); border-radius: 12px; padding: 10px; }
+  .pay svg { width: 100%; height: auto; display: block; background: #fff; }
+  .pay p { line-height: 1.5; font-size: 12px; }
+  .pay a { color: var(--brand-dark); word-break: break-all; }
+  .thanks { margin-top: 14px; color: var(--muted); font-size: 12px; text-align: center; }
+
+  .log { width: 100%; border-collapse: collapse; font-size: 12px; background: var(--card); border-radius: 14px; overflow: hidden; font-variant-numeric: tabular-nums; }
+  .log td, .log th { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: left; }
+  .log td:first-child { white-space: nowrap; }
+  .log td:nth-child(3), .log td:nth-child(4) { white-space: nowrap; }
+  .log th { background: #F8F9FA; color: #5F6368; font-weight: 500; text-transform: none; letter-spacing: 0; font-size: 12px; border-bottom: 1px solid var(--line); }
+  .log td:nth-child(3) { text-align: right; }
+  .log .st { font-weight: 600; border-radius: 999px; padding: 2px 8px; font-size: 11px; white-space: nowrap; }
+  .st.wait { background: var(--soft); color: var(--brand-dark); } .st.paid { background: #E6F4EA; color: var(--ok); } .st.late { background: #FDECEA; color: var(--late); }
+  .log button { border: 0; background: none; color: var(--brand-dark); font: 600 11px Inter, sans-serif; cursor: pointer; text-decoration: underline; }
+  .log tr.new td { animation: flash 2s ease-out; }
+  @keyframes flash { 0% { background: #FCE8B2; } }
+
+  .calc { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; }
+  .calc .out { grid-column: 1 / -1; background: var(--ink); color: #fff; border-radius: 14px; padding: 12px 14px; font-size: 14px; }
+  .calc .out b { font-size: 22px; }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+
+  @media print {
+    @page { margin: 14mm; }
+    body { background: #fff; }
+    .wrap > *:not(#inv) { display: none !important; }
+    .wrap { max-width: none; padding: 0; }
+    #inv { display: block; box-shadow: none; padding: 0; margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <small>STUDIO NOUR · FACTURATION</small>
+    <h1>Une facture en 30 secondes</h1>
+  </header>
+
+  <form class="card" id="form">
+    <label for="client">Client</label>
+    <select id="client"></select>
+    <span class="label">Prestations</span>
+    <div class="items" id="items"></div>
+    <div class="row">
+      <div><label for="acompte">Acompte déjà versé (DA)</label><input id="acompte" type="number" min="0" step="500" value="40500"></div>
+      <div><label for="taxe">Taxe (%)</label><input id="taxe" type="number" min="0" max="30" step="1" value="0"></div>
+    </div>
+    <label for="lien">Lien de paiement (Stripe, Chargily, PayPal…)</label>
+    <input id="lien" type="url" value="https://paiement.exemple/studio-nour">
+    <button class="btn" type="submit">🧾 Créer la facture</button>
+  </form>
+
+  <article id="inv" aria-live="polite">
+    <div class="inv-head">
+      <div><div class="mark">Studio <span>Nour</span></div><div style="color:var(--muted);font-size:12px;line-height:1.5;margin-top:4px">Photographe · Alger<br>contact@studio-nour.exemple</div></div>
+      <div class="meta"><b>Facture</b><span id="num"></span><br><span id="dates"></span></div>
+    </div>
+    <div class="parties">
+      <div><small>Facturé à</small><span id="to"></span></div>
+      <div><small>Échéance</small><span id="due"></span></div>
+    </div>
+    <table><thead><tr><th>Prestation</th><th>Qté</th><th>Montant</th></tr></thead><tbody id="lines"></tbody></table>
+    <div class="totals" id="totals"></div>
+    <div class="pay"><div id="qr"></div><p>Payez en ligne en scannant le code ou via<br><a id="pay-link" target="_blank" rel="noopener"></a><br>Virement : RIB sur demande.</p></div>
+    <p class="thanks">Merci pour votre confiance 📸</p>
+  </article>
+
+  <div class="actions" id="actions" hidden>
+    <button class="btn ghost" id="pdf" type="button">📄 PDF</button>
+    <a class="btn" id="wa" target="_blank" rel="noopener">💬 WhatsApp</a>
+  </div>
+
+  <h2>Vos factures</h2>
+  <table class="log"><thead><tr><th>N°</th><th>Client</th><th>Reste</th><th>Statut</th><th></th></tr></thead><tbody id="log"></tbody></table>
+
+  <h2>Le temps que ça vous rend</h2>
+  <div class="card calc">
+    <label>Factures par mois<input id="n" type="number" min="1" value="12"></label>
+    <label>Minutes par facture à la main<input id="m" type="number" min="1" value="20"></label>
+    <div class="out" id="saved"></div>
+  </div>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Une fois pour toutes : votre modèle de facture et vos prestations avec leurs prix.</li>
+      <li>Choisissez le client et les prestations : numéro, dates et totaux se remplissent seuls.</li>
+      <li>Le PDF part par email ou WhatsApp, avec le lien de paiement.</li>
+      <li>Le tableau suit chaque facture : en attente, payée, ou relancée automatiquement.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  const CLIENTS = [
+    { nom: "Sarah & Yanis Haddad", adresse: "Rue des Pins, Tipaza", tel: "0550 12 34 56" },
+    { nom: "Agence Horizon", adresse: "Bd Mohamed V, Alger", tel: "0661 22 33 44" },
+    { nom: "Mme Benali", adresse: "Cité des Roses, Blida", tel: "0770 55 66 77" },
+  ];
+  const PRESTATIONS = [
+    { nom: "Formule Signature — reportage 8 h", prix: 110000, qte: 1 },
+    { nom: "Album photo 30×30, 40 pages", prix: 25000, qte: 1 },
+    { nom: "Tirages fine art 30×40", prix: 4000, qte: 0 },
+    { nom: "Frais de déplacement (Tipaza)", prix: 5000, qte: 0 },
+  ];
+  const DELAI_PAIEMENT = 15;
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => n.toLocaleString("fr-FR").replace(/ /g, " ") + " DA";
+
+  CLIENTS.forEach((c, i) => $("client").append(new Option(c.nom, i)));
+  PRESTATIONS.forEach((p, i) => {
+    const row = document.createElement("div");
+    row.className = "item";
+    row.innerHTML = `<span></span><b>${fmt(p.prix)}</b><input type="number" min="0" max="20" value="${p.qte}" aria-label="Quantité" data-i="${i}">`;
+    row.querySelector("span").textContent = p.nom;
+    $("items").append(row);
+  });
+
+  let numero = 42;
+  let factures = [
+    { num: "FA-2026-0040", client: "Agence Horizon", reste: 45000, statut: "late" },
+    { num: "FA-2026-0041", client: "Mme Benali", reste: 0, statut: "paid" },
+  ];
+  try {
+    numero = Number(localStorage.getItem("studio-nour-facture")) || numero;
+    factures = JSON.parse(localStorage.getItem("studio-nour-factures")) || factures;
+  } catch {}
+  const save = () => { try { localStorage.setItem("studio-nour-facture", numero); localStorage.setItem("studio-nour-factures", JSON.stringify(factures)); } catch {} };
+
+  function renderLog(highlight) {
+    const label = { wait: "En attente", paid: "Payée", late: "En retard" };
+    $("log").innerHTML = "";
+    factures.slice().reverse().forEach((f) => {
+      const tr = document.createElement("tr");
+      if (f.num === highlight) tr.className = "new";
+      tr.innerHTML = `<td>${f.num}</td><td></td><td>${fmt(f.reste)}</td><td><span class="st ${f.statut}">${label[f.statut]}</span></td><td></td>`;
+      tr.children[1].textContent = f.client;
+      if (f.statut !== "paid") {
+        const b = document.createElement("button");
+        b.textContent = "Payée ✓";
+        b.onclick = () => { f.statut = "paid"; f.reste = 0; save(); renderLog(); };
+        tr.children[4].append(b);
+      }
+      $("log").append(tr);
+    });
+  }
+
+  $("form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const c = CLIENTS[Number($("client").value)];
+    const lignes = [...document.querySelectorAll("#items input")]
+      .map((inp) => ({ ...PRESTATIONS[Number(inp.dataset.i)], qte: Math.max(0, Math.min(20, Number(inp.value) || 0)) }))
+      .filter((l) => l.qte > 0);
+    if (!lignes.length) return alert("Ajoutez au moins une prestation.");
+
+    const sousTotal = lignes.reduce((s, l) => s + l.prix * l.qte, 0);
+    const taux = Math.max(0, Number($("taxe").value) || 0) / 100;
+    const taxe = Math.round(sousTotal * taux);
+    const total = sousTotal + taxe;
+    const acompte = Math.min(total, Math.max(0, Number($("acompte").value) || 0));
+    const reste = total - acompte;
+    numero++;
+    const num = `FA-${new Date().getFullYear()}-${String(numero).padStart(4, "0")}`;
+    const today = new Date();
+    const due = new Date(today.getTime() + DELAI_PAIEMENT * 864e5);
+    const lien = $("lien").value.trim();
+
+    $("num").textContent = num;
+    $("dates").textContent = `Émise le ${today.toLocaleDateString("fr-FR")}`;
+    $("to").textContent = `${c.nom}\n${c.adresse}`;
+    $("to").style.whiteSpace = "pre-line";
+    $("due").textContent = `${due.toLocaleDateString("fr-FR")} (${DELAI_PAIEMENT} jours)`;
+    $("lines").innerHTML = "";
+    lignes.forEach((l) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td></td><td>${l.qte}</td><td>${fmt(l.prix * l.qte)}</td>`;
+      tr.firstChild.textContent = l.nom;
+      $("lines").append(tr);
+    });
+    const tot = [["Sous-total", fmt(sousTotal)]];
+    if (taux) tot.push([`Taxe (${Math.round(taux * 100)} %)`, fmt(taxe)]);
+    tot.push(["Total", fmt(total)]);
+    if (acompte) tot.push(["Acompte reçu", "− " + fmt(acompte)]);
+    $("totals").innerHTML = "";
+    tot.forEach(([k, v]) => { const d = document.createElement("div"); d.innerHTML = "<span></span><span></span>"; d.children[0].textContent = k; d.children[1].textContent = v; $("totals").append(d); });
+    const dueRow = document.createElement("div");
+    dueRow.className = "due";
+    dueRow.innerHTML = `<span>Reste à payer</span><span>${fmt(reste)}</span>`;
+    $("totals").append(dueRow);
+
+    $("pay-link").textContent = lien || "—";
+    $("pay-link").href = lien || "#";
+    if (lien) {
+      const qr = qrcode(0, "M");
+      qr.addData(lien);
+      qr.make();
+      $("qr").innerHTML = qr.createSvgTag({ cellSize: 3, margin: 2, scalable: true });
+    } else $("qr").innerHTML = "";
+
+    $("inv").classList.add("show");
+    $("actions").hidden = false;
+    const tel = c.tel.replace(/\D/g, "").replace(/^0/, "213");
+    $("wa").href = `https://wa.me/${tel}?text=${encodeURIComponent(
+      `Bonjour ${c.nom.split(" ")[0]} ! Voici votre facture ${num} : reste à payer ${fmt(reste)}, avant le ${due.toLocaleDateString("fr-FR")}.\n${lien ? `Paiement en ligne : ${lien}\n` : ""}Je vous envoie le PDF juste après. Merci ! 📸`)}`;
+
+    factures.push({ num, client: c.nom, reste, statut: reste ? "wait" : "paid" });
+    save();
+    renderLog(num);
+    $("inv").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  $("pdf").onclick = () => window.print();
+
+  function calc() {
+    const h = (Math.max(1, Number($("n").value) || 1) * Math.max(1, Number($("m").value) || 1)) / 60;
+    $("saved").innerHTML = `<b>${h.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} h</b> par mois rendues, soit ${Math.round(h * 12)} h par an.`;
+  }
+  $("n").oninput = $("m").oninput = calc;
+  calc();
+  renderLog();
+</script>
+</body>
+</html>

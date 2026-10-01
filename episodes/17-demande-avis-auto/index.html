@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salon Jasmin — Demande d'avis</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --soft: #FBEDE6; --ok: #1E7A42; --star: #E2A23B;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 28px 0 12px; }
+  header small { color: var(--brand-dark); font-weight: 600; letter-spacing: 1px; font-size: 12px; }
+  h1 { font: 600 27px Fraunces, serif; margin-top: 4px; }
+  header p { color: var(--muted); font-size: 14px; margin-top: 6px; }
+  h2 { font: 600 19px Fraunces, serif; margin: 26px 0 10px; }
+
+  .clockbar { position: sticky; top: 0; z-index: 3; background: var(--bg); padding: 10px 0; display: flex; gap: 10px; align-items: center; }
+  .clock { background: var(--ink); color: #fff; border-radius: 14px; padding: 8px 14px; text-align: center; }
+  .clock small { display: block; font-size: 11px; opacity: .7; }
+  .clock b { font: 600 22px Inter, sans-serif; font-variant-numeric: tabular-nums; }
+  .clockbar button { flex: 1; padding: 14px; border: 0; border-radius: 999px; background: var(--brand); color: #fff; font: 600 14px Inter, sans-serif; cursor: pointer; }
+  .clockbar button:disabled { opacity: .45; cursor: default; }
+
+  .rdv { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; margin-bottom: 8px; transition: border-color .3s; }
+  .rdv .h { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 48px; }
+  .rdv b { display: block; font-size: 14px; }
+  .rdv small { color: var(--muted); font-size: 12px; }
+  .rdv .st { margin-left: auto; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; white-space: nowrap; background: var(--bg); color: var(--muted); }
+  .rdv.sent { border-color: #BFE3CB; }
+  .rdv.sent .st { background: #E6F4EA; color: var(--ok); }
+  .rdv.flash { animation: flash 1.6s ease-out; }
+  @keyframes flash { 0% { background: #E6F4EA; } }
+
+  .phone { margin: 18px auto 0; width: 270px; border-radius: 34px; background: #1b1512; padding: 12px; box-shadow: 0 30px 50px -25px #0008; }
+  .screen { border-radius: 24px; background: #ECE5DD; min-height: 300px; padding: 14px 10px; display: flex; flex-direction: column; gap: 8px; }
+  .chat-h { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--ink); padding-bottom: 6px; border-bottom: 1px solid #d8cfc5; }
+  .chat-h i { width: 26px; height: 26px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; font: 600 13px Fraunces, serif; font-style: normal; }
+  .bubble { background: #fff; border-radius: 4px 14px 14px 14px; padding: 9px 11px; font-size: 12.5px; line-height: 1.45; white-space: pre-wrap; animation: pop .4s ease-out; max-width: 92%; }
+  .bubble a { color: #0b6bcb; word-break: break-all; }
+  .bubble small { display: block; text-align: right; color: var(--muted); font-size: 10px; margin-top: 4px; }
+  .waiting { margin: auto; color: var(--muted); font-size: 12px; text-align: center; }
+  @keyframes pop { from { transform: scale(.94); opacity: 0; } }
+
+  .settings { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px; display: grid; gap: 10px; }
+  .settings label { font-size: 13px; font-weight: 600; display: grid; gap: 6px; }
+  .settings input, .settings select { padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--line); font: inherit; font-size: 14px; }
+  .settings input:focus, .settings select:focus { outline: none; border-color: var(--brand); }
+
+  .counter { display: grid; grid-template-columns: 130px 1fr; gap: 14px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px; }
+  .qr { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px; }
+  .qr svg { width: 100%; height: auto; display: block; }
+  .counter b { font: 600 18px Fraunces, serif; display: block; }
+  .counter .stars { color: var(--star); letter-spacing: 2px; margin: 4px 0; }
+  .counter p { color: var(--muted); font-size: 13px; line-height: 1.45; }
+  .note { margin-top: 12px; background: var(--soft); border-radius: 14px; padding: 12px 14px; font-size: 13px; line-height: 1.5; }
+  .note b { color: var(--brand-dark); }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <small>SALON JASMIN · AVIS GOOGLE</small>
+    <h1>La demande d'avis part toute seule</h1>
+    <p>2 heures après chaque rendez-vous, la cliente reçoit un merci et le lien direct vers Google.</p>
+  </header>
+
+  <div class="clockbar">
+    <div class="clock"><small>Aujourd'hui</small><b id="clock">--:--</b></div>
+    <button id="ff">⏩ Avancer d'une heure</button>
+  </div>
+  <div id="list"></div>
+
+  <div class="phone" aria-live="polite">
+    <div class="screen" id="screen">
+      <div class="chat-h"><i>J</i>Salon Jasmin</div>
+      <p class="waiting" id="waiting">Le prochain message apparaîtra ici.</p>
+    </div>
+  </div>
+
+  <h2>Les réglages</h2>
+  <div class="settings">
+    <label>Message
+      <input id="tpl" value="Merci {prénom} pour votre visite aujourd'hui 🌸 Si vous avez 30 secondes, votre avis nous aide énormément :">
+    </label>
+    <label>Envoyer
+      <select id="delay"><option value="1">1 h après le rendez-vous</option><option value="2" selected>2 h après le rendez-vous</option><option value="3">3 h après le rendez-vous</option></select>
+    </label>
+    <label>Identifiant Google de votre fiche (Place ID)
+      <input id="place" value="ChIJ-EXEMPLE-SalonJasmin">
+    </label>
+  </div>
+
+  <h2>Et au comptoir</h2>
+  <div class="counter">
+    <div class="qr" id="qr"></div>
+    <div><b>Vous avez aimé ?</b><div class="stars">★★★★★</div><p>Scannez pour laisser un avis sur Google. Merci, ça nous aide beaucoup !</p></div>
+  </div>
+  <p class="note"><b>Le même message pour toutes les clientes.</b> Google interdit de demander des avis seulement aux clients contents. Tout le monde reçoit la même demande, et chacune peut répondre au message en privé si quelque chose n'allait pas.</p>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Récupérez le lien direct vers l'avis Google de votre fiche.</li>
+      <li>Écrivez un merci court, avec le prénom de la cliente.</li>
+      <li>Le script l'envoie 2 heures après chaque rendez-vous, à toutes les clientes.</li>
+      <li>Ajoutez le QR code au comptoir : les avis arrivent sans que vous y pensiez.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  const RDV = [
+    { h: "09:00", nom: "Yasmine B.", prestation: "Couleur" },
+    { h: "10:30", nom: "Nadia K.", prestation: "Manucure" },
+    { h: "12:00", nom: "Lina M.", prestation: "Soin kératine" },
+    { h: "14:00", nom: "Sara H.", prestation: "Coupe + brushing" },
+    { h: "16:30", nom: "Amel T.", prestation: "Brushing" },
+  ];
+  const START = 11 * 60;   // l'horloge de la démo démarre à 11h00
+  const END = 19 * 60;
+  const $ = (id) => document.getElementById(id);
+  const pad = (n) => String(n).padStart(2, "0");
+  const toMin = (h) => { const [a, b] = h.split(":").map(Number); return a * 60 + b; };
+  let now = START;
+  const sent = new Set();
+
+  const reviewLink = () => `https://search.google.com/local/writereview?placeid=${encodeURIComponent($("place").value.trim())}`;
+  const message = (r) => `${$("tpl").value.replaceAll("{prénom}", r.nom.split(" ")[0])}\n${reviewLink()}\n\nUn souci ? Répondez simplement à ce message.`;
+
+  function render(flash = []) {
+    $("clock").textContent = `${pad(Math.floor(now / 60))}:${pad(now % 60)}`;
+    const delay = Number($("delay").value) * 60;
+    $("list").innerHTML = "";
+    RDV.forEach((r) => {
+      const at = toMin(r.h) + delay;
+      const isSent = sent.has(r.nom);
+      const el = document.createElement("div");
+      el.className = "rdv" + (isSent ? " sent" : "") + (flash.includes(r.nom) ? " flash" : "");
+      el.innerHTML = `<span class="h">${r.h}</span><div><b></b><small></small></div><span class="st"></span>`;
+      el.querySelector("b").textContent = r.nom;
+      el.querySelector("small").textContent = r.prestation;
+      el.querySelector(".st").textContent = isSent ? "Avis demandé ✓" : now < toMin(r.h) ? "À venir" : `Envoi à ${pad(Math.floor(at / 60))}:${pad(at % 60)}`;
+      $("list").append(el);
+    });
+    $("ff").disabled = now >= END;
+  }
+
+  function deliver() {
+    const delay = Number($("delay").value) * 60;
+    const due = RDV.filter((r) => !sent.has(r.nom) && toMin(r.h) + delay <= now);
+    due.forEach((r) => {
+      sent.add(r.nom);
+      $("waiting")?.remove();
+      const b = document.createElement("div");
+      b.className = "bubble";
+      const [intro, , ...rest] = message(r).split("\n");
+      b.append(intro + "\n");
+      const a = document.createElement("a");
+      a.href = reviewLink();
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = "⭐ Laisser un avis sur Google";
+      b.append(a, "\n" + rest.join("\n").trim());
+      const t = toMin(r.h) + delay;
+      b.append(Object.assign(document.createElement("small"), { textContent: `à ${r.nom.split(" ")[0]} · ${pad(Math.floor(t / 60))}:${pad(t % 60)}` }));
+      $("screen").append(b);
+      $("screen").scrollTop = $("screen").scrollHeight;
+    });
+    return due.map((r) => r.nom);
+  }
+
+  function renderQR() {
+    const qr = qrcode(0, "M");
+    qr.addData(reviewLink());
+    qr.make();
+    $("qr").innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+  }
+
+  $("ff").onclick = () => { now = Math.min(END, now + 60); render(deliver()); };
+  $("delay").onchange = () => { render(deliver()); };
+  $("tpl").oninput = render;
+  $("place").oninput = () => { renderQR(); render(); };
+  renderQR();
+  render(deliver());
+</script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagnostic Automatise ça</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --soft: #FBEDE6; --ok: #1E7A42;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 28px 0 14px; }
+  header small { color: var(--brand-dark); font-weight: 600; letter-spacing: 1px; font-size: 12px; }
+  h1 { font: 600 28px/1.15 Fraunces, serif; margin-top: 4px; }
+  header p { color: var(--muted); font-size: 14px; margin-top: 8px; }
+
+  .progress { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; }
+  .progress i { display: block; height: 100%; width: 0; background: var(--brand); transition: width .35s; }
+  .qcount { font-size: 12px; color: var(--muted); margin: 8px 0 4px; }
+  .q { animation: slide .35s ease-out; }
+  @keyframes slide { from { opacity: 0; transform: translateY(10px); } }
+  .q h2 { font: 600 22px Fraunces, serif; margin-bottom: 14px; }
+  .opts { display: grid; gap: 8px; }
+  .opts button { display: flex; align-items: center; gap: 12px; text-align: left; padding: 14px 16px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--card); font: 500 15px Inter, sans-serif; cursor: pointer; color: var(--ink); }
+  .opts button:hover, .opts button:focus-visible { border-color: var(--brand); background: var(--soft); outline: none; }
+  .opts button span { font-size: 22px; }
+  .back { margin-top: 12px; border: 0; background: none; color: var(--muted); font: 500 13px Inter, sans-serif; cursor: pointer; text-decoration: underline; }
+
+  .result { animation: slide .35s ease-out; }
+  .hours { background: var(--ink); color: #fff; border-radius: 22px; padding: 18px; display: flex; align-items: center; gap: 14px; }
+  .hours b { font: 700 52px/1 Inter, sans-serif; letter-spacing: -2px; }
+  .hours span { font-size: 14px; line-height: 1.45; color: #E9DCD3; }
+  .top { display: grid; gap: 8px; margin-top: 14px; }
+  .auto { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; text-decoration: none; color: inherit; animation: slide .4s ease-out backwards; }
+  .auto .n { width: 34px; height: 34px; border-radius: 50%; background: var(--soft); color: var(--brand-dark); display: grid; place-items: center; font-weight: 700; }
+  .auto b { display: block; font-size: 14px; }
+  .auto small { color: var(--muted); font-size: 12px; line-height: 1.4; display: block; margin-top: 2px; }
+  .auto .h { font-size: 12px; font-weight: 700; color: var(--ok); white-space: nowrap; }
+  .cta { display: block; margin-top: 16px; padding: 16px; border-radius: 999px; background: #25D366; color: #fff; text-align: center; text-decoration: none; font: 700 16px Inter, sans-serif; }
+  .again { display: block; width: 100%; margin-top: 8px; padding: 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); font: 600 14px Inter, sans-serif; cursor: pointer; color: var(--ink); }
+  details { margin-top: 14px; font-size: 13px; color: var(--muted); line-height: 1.55; }
+  summary { cursor: pointer; }
+  [hidden] { display: none !important; }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+  .steps small { color: #E9DCD3; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <small>AUTOMATISE ÇA · DIAGNOSTIC GRATUIT</small>
+    <h1>Les 5 automatisations faites pour votre commerce</h1>
+    <p>6 questions, une minute. Parmi les 22 automatisations de la série, voici celles qui vous feront gagner le plus de temps.</p>
+  </header>
+
+  <div id="quiz">
+    <div class="progress"><i id="bar"></i></div>
+    <p class="qcount" id="qcount"></p>
+    <div id="question"></div>
+  </div>
+
+  <div class="result" id="result" hidden aria-live="polite">
+    <div class="hours"><b id="h">0</b><span>heures par semaine à récupérer, environ, avec ces 5 automatisations.</span></div>
+    <div class="top" id="top"></div>
+    <a class="cta" id="cta" target="_blank" rel="noopener">Recevoir mon plan sur WhatsApp</a>
+    <button class="again" id="again" type="button">Refaire le diagnostic</button>
+    <details>
+      <summary>Comment c'est calculé</summary>
+      Chaque automatisation reçoit des points selon votre activité, la façon dont vos clients vous contactent, vos rendez-vous, vos devis et ce qui vous prend le plus de temps. Les heures sont une estimation à partir de votre nombre de messages par jour : notez le temps réel après un mois.
+    </details>
+  </div>
+
+  <section class="steps" aria-label="Les 5 automatisations">
+    <h3>Si j'ouvrais un commerce demain</h3>
+    <ol>
+      <li>Le bouton WhatsApp avec le message déjà écrit <small>(épisode 1)</small></li>
+      <li>Les créneaux en ligne et le rappel la veille <small>(épisodes 5 et 6)</small></li>
+      <li>La demande d'avis après chaque visite <small>(épisode 17)</small></li>
+      <li>Le message aux clients qui ne reviennent plus <small>(épisode 16)</small></li>
+      <li>Le rapport du lundi matin <small>(épisode 23)</small></li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  // Numéro WhatsApp de ClickVente (sans « + ») : chaque diagnostic envoyé est un prospect.
+  const CLICKVENTE = "213000000000";
+
+  const QUESTIONS = [
+    { id: "activite", titre: "Votre activité ?", options: [["cafe", "☕", "Café, restaurant, traiteur"], ["boutique", "🛍️", "Boutique, e-commerce"], ["beaute", "💇‍♀️", "Salon, beauté, bien-être"], ["sante", "🩺", "Santé, clinique, cabinet"], ["artisan", "🔨", "Artisan, BTP, dépannage"], ["evenement", "📸", "Événementiel, photo, formation"]] },
+    { id: "contact", titre: "Vos clients vous contactent surtout…", options: [["dm", "📱", "En DM Instagram ou Facebook"], ["whatsapp", "💬", "Sur WhatsApp"], ["telephone", "📞", "Par téléphone"], ["surplace", "🚪", "Sur place"]] },
+    { id: "rdv", titre: "Vous prenez des rendez-vous ou des réservations ?", options: [["beaucoup", "📅", "Oui, tous les jours"], ["unpeu", "🗓️", "De temps en temps"], ["non", "🚫", "Non"]] },
+    { id: "devis", titre: "Vous faites des devis ?", options: [["souvent", "📝", "Oui, souvent"], ["parfois", "✏️", "Parfois"], ["jamais", "🚫", "Jamais"]] },
+    { id: "volume", titre: "Combien de messages clients par jour ?", options: [["v1", "🙂", "Moins de 10"], ["v2", "😅", "10 à 30"], ["v3", "😵", "30 à 60"], ["v4", "🤯", "Plus de 60"]] },
+    { id: "douleur", titre: "Ce qui vous prend le plus de temps ?", options: [["questions", "🔁", "Répondre aux mêmes questions"], ["agenda", "📆", "Gérer les rendez-vous"], ["vente", "🤝", "Les devis et les relances"], ["reseaux", "🎬", "Publier sur les réseaux"], ["admin", "🧾", "Les factures et l'administratif"]] },
+  ];
+
+  // Les automatisations des deux saisons (hors épisodes 12 et 24, qui les rassemblent).
+  // act : points par activité · si : conditions qui ajoutent des points · h : heures/semaine de base.
+  const AUTOS = [
+    { ep: "01-menu-whatsapp", n: 1, titre: "Bouton « Commander sur WhatsApp »", act: { cafe: 3, boutique: 2 }, si: { contact: ["dm", "whatsapp"], douleur: ["questions"] }, h: 1.5 },
+    { ep: "02-commande-boutique", n: 2, titre: "Formulaire de commande complet", act: { boutique: 3, cafe: 1 }, si: { contact: ["dm", "whatsapp"] }, h: 1.5 },
+    { ep: "03-qr-code-whatsapp", n: 3, titre: "QR code WhatsApp en vitrine", act: { cafe: 2, boutique: 2, beaute: 1 }, si: { contact: ["surplace"] }, h: 0.5 },
+    { ep: "04-reservation-sheets", n: 4, titre: "Réservations qui remplissent Google Sheets", act: { beaute: 2, sante: 2, cafe: 1 }, rdv: true, si: { douleur: ["agenda"] }, h: 2 },
+    { ep: "05-rappel-veille", n: 5, titre: "Rappel automatique la veille", act: { beaute: 3, sante: 3, evenement: 1 }, rdv: true, si: { douleur: ["agenda"] }, h: 1.5 },
+    { ep: "06-creneaux-en-ligne", n: 6, titre: "Créneaux en ligne, sans appel", act: { beaute: 3, sante: 3 }, rdv: true, si: { contact: ["telephone", "dm"], douleur: ["agenda"] }, h: 2.5 },
+    { ep: "07-devis-alerte", n: 7, titre: "Formulaire de devis + alerte instantanée", act: { artisan: 3, evenement: 3 }, devis: true, si: { douleur: ["vente"] }, h: 1.5 },
+    { ep: "08-relance-auto", n: 8, titre: "Relance après 2 jours sans réponse", act: { artisan: 3, evenement: 3, sante: 1 }, devis: true, si: { douleur: ["vente"] }, h: 1.5 },
+    { ep: "09-tableau-prospects", n: 9, titre: "Tableau : d'où viennent vos clients", act: { artisan: 1, evenement: 1, boutique: 1, beaute: 1 }, si: { douleur: ["reseaux"] }, h: 0.5 },
+    { ep: "10-chatbot-ia", n: 10, titre: "Chatbot IA pour les questions fréquentes", act: { cafe: 2, beaute: 2, sante: 2, boutique: 2 }, volume: true, si: { douleur: ["questions"] }, h: 2.5 },
+    { ep: "11-reponses-avis-ia", n: 11, titre: "Réponses aux avis préparées par l'IA", act: { cafe: 3, sante: 2, beaute: 2 }, si: {}, h: 0.5 },
+    { ep: "13-devis-ia-60-secondes", n: 13, titre: "Devis personnalisé en 60 secondes", act: { evenement: 3, artisan: 3 }, devis: true, si: { douleur: ["vente", "admin"] }, h: 2 },
+    { ep: "14-tri-prospects", n: 14, titre: "Tri automatique des demandes", act: { artisan: 2, evenement: 2 }, devis: true, volume: true, si: { douleur: ["vente"] }, h: 1 },
+    { ep: "15-photo-semaine-posts", n: 15, titre: "Une photo, une semaine de posts", act: { cafe: 3, boutique: 3, beaute: 2, evenement: 1 }, si: { douleur: ["reseaux"] }, h: 2 },
+    { ep: "16-clients-perdus", n: 16, titre: "Le message aux clients perdus", act: { beaute: 3, sante: 2, cafe: 2 }, rdv: true, si: {}, h: 1 },
+    { ep: "17-demande-avis-auto", n: 17, titre: "Demande d'avis après chaque visite", act: { beaute: 3, sante: 3, cafe: 2, artisan: 2 }, si: {}, h: 1 },
+    { ep: "18-facture-auto", n: 18, titre: "Facture automatique avec lien de paiement", act: { evenement: 3, artisan: 3 }, devis: true, si: { douleur: ["admin"] }, h: 2 },
+    { ep: "19-liste-attente-black-friday", n: 19, titre: "Liste d'attente WhatsApp pour vos promos", act: { boutique: 3, cafe: 1 }, si: { contact: ["dm", "whatsapp"], douleur: ["reseaux"] }, h: 0.5 },
+    { ep: "20-catalogue-google-sheets", n: 20, titre: "Catalogue à jour depuis Google Sheets", act: { boutique: 3, cafe: 1 }, volume: true, si: { douleur: ["questions"] }, h: 1.5 },
+    { ep: "21-prospects-entreprises", n: 21, titre: "Liste d'entreprises à démarcher", act: { evenement: 2, cafe: 1, artisan: 2 }, si: { douleur: ["vente"] }, h: 1 },
+    { ep: "22-agent-commandes-ia", n: 22, titre: "Agent IA qui prend les commandes", act: { cafe: 3, boutique: 1 }, volume: true, si: { contact: ["dm", "whatsapp"], douleur: ["questions"] }, h: 3 },
+    { ep: "23-rapport-du-lundi", n: 23, titre: "Le rapport du lundi matin", act: { beaute: 2, sante: 2, cafe: 1, boutique: 1, artisan: 1, evenement: 1 }, si: { douleur: ["admin"] }, h: 0.5 },
+  ];
+  const VOLUME = { v1: 0.5, v2: 1, v3: 1.5, v4: 2 };
+  const CONTACT = { dm: "en DM Instagram ou Facebook", whatsapp: "sur WhatsApp", telephone: "par téléphone", surplace: "sur place" };
+  const LIBELLES = Object.fromEntries(QUESTIONS.map((q) => [q.id, Object.fromEntries(q.options.map(([v, , t]) => [v, t]))]));
+
+  const $ = (id) => document.getElementById(id);
+  let step = 0;
+  const answers = {};
+
+  function showQuestion() {
+    const q = QUESTIONS[step];
+    $("bar").style.width = `${(step / QUESTIONS.length) * 100}%`;
+    $("qcount").textContent = `Question ${step + 1} sur ${QUESTIONS.length}`;
+    const box = document.createElement("div");
+    box.className = "q";
+    box.innerHTML = "<h2></h2><div class='opts'></div>";
+    box.querySelector("h2").textContent = q.titre;
+    q.options.forEach(([value, emoji, label]) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.innerHTML = `<span>${emoji}</span>`;
+      b.append(label);
+      b.onclick = () => { answers[q.id] = value; step++; step < QUESTIONS.length ? showQuestion() : showResult(); };
+      box.querySelector(".opts").append(b);
+    });
+    if (step > 0) {
+      const back = document.createElement("button");
+      back.className = "back";
+      back.type = "button";
+      back.textContent = "← Question précédente";
+      back.onclick = () => { step--; showQuestion(); };
+      box.append(back);
+    }
+    $("question").replaceChildren(box);
+    box.querySelector(".opts button").focus({ preventScroll: true });
+  }
+
+  function score(a) {
+    let s = a.act[answers.activite] || 0;
+    if (a.rdv) s += { beaucoup: 3, unpeu: 1, non: -4 }[answers.rdv];
+    if (a.devis) s += { souvent: 3, parfois: 1, jamais: -4 }[answers.devis];
+    if (a.volume) s += { v1: -1, v2: 0, v3: 1, v4: 2 }[answers.volume];
+    if (a.si.contact && a.si.contact.includes(answers.contact)) s += 2;
+    if (a.si.douleur && a.si.douleur.includes(answers.douleur)) s += 3;
+    return s;
+  }
+
+  function pourquoi(a) {
+    if (a.si.douleur && a.si.douleur.includes(answers.douleur)) return `Parce que « ${LIBELLES.douleur[answers.douleur].toLowerCase()} » vous prend le plus de temps.`;
+    if (a.rdv && answers.rdv === "beaucoup") return "Parce que vous prenez des rendez-vous tous les jours.";
+    if (a.devis && answers.devis === "souvent") return "Parce que vous faites souvent des devis.";
+    if (a.si.contact && a.si.contact.includes(answers.contact)) return `Parce que vos clients vous contactent surtout ${CONTACT[answers.contact]}.`;
+    return `Un classique pour « ${LIBELLES.activite[answers.activite].toLowerCase()} ».`;
+  }
+
+  function showResult() {
+    $("bar").style.width = "100%";
+    const top = AUTOS.map((a) => ({ a, s: score(a) })).sort((x, y) => y.s - x.s || x.a.n - y.a.n).slice(0, 5);
+    const factor = VOLUME[answers.volume];
+    const hours = top.map(({ a }) => Math.round(a.h * factor * 2) / 2);
+    const total = hours.reduce((t, h) => t + h, 0);
+    $("h").textContent = total.toLocaleString("fr-FR");
+    $("top").innerHTML = "";
+    top.forEach(({ a }, i) => {
+      const el = document.createElement("a");
+      el.className = "auto";
+      el.href = `../${a.ep}/`;
+      el.style.animationDelay = `${i * 90}ms`;
+      el.innerHTML = `<span class="n">${i + 1}</span><span><b></b><small></small></span><span class="h">≈ ${hours[i].toLocaleString("fr-FR")} h</span>`;
+      el.querySelector("b").textContent = a.titre;
+      el.querySelector("small").textContent = `${pourquoi(a)} Épisode ${a.n}.`;
+      $("top").append(el);
+    });
+    const plan = top.map(({ a }, i) => `${i + 1}. ${a.titre} (ép. ${a.n})`).join("\n");
+    $("cta").href = `https://wa.me/${CLICKVENTE}?text=${encodeURIComponent(
+      `Bonjour ! Voici mon diagnostic « Automatise ça » :\nActivité : ${LIBELLES.activite[answers.activite]}\nMes clients me contactent : ${CONTACT[answers.contact]}\nMessages par jour : ${LIBELLES.volume[answers.volume].toLowerCase()}\n\nMes 5 automatisations :\n${plan}\n\nTemps à récupérer : environ ${total.toLocaleString("fr-FR")} h par semaine.\nJe veux bien voir à quoi ça ressemblerait pour mon commerce !`)}`;
+    $("quiz").hidden = true;
+    $("result").hidden = false;
+  }
+
+  $("again").onclick = () => {
+    step = 0;
+    Object.keys(answers).forEach((k) => delete answers[k]);
+    $("result").hidden = true;
+    $("quiz").hidden = false;
+    showQuestion();
+  };
+  showQuestion();
+</script>
+</body>
+</html>

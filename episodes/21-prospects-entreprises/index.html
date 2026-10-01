@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Les Délices — Prospects entreprises</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --soft: #FBEDE6; --ok: #1E7A42; --star: #E2A23B;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 28px 0 12px; }
+  header small { color: var(--brand-dark); font-weight: 600; letter-spacing: 1px; font-size: 12px; }
+  h1 { font: 600 26px Fraunces, serif; margin-top: 4px; }
+  header p { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+  .search { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 14px; }
+  .search .row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; }
+  .search input { width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid var(--line); font: inherit; font-size: 15px; }
+  .search input:focus { outline: none; border-color: var(--brand); }
+  .search button[type=submit] { width: 100%; margin-top: 10px; padding: 14px; border: 0; border-radius: 999px; background: var(--brand); color: #fff; font: 600 15px Inter, sans-serif; cursor: pointer; }
+  .search button[type=submit]:disabled { opacity: .6; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .chips button { border: 1.5px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 10px; font: 500 12px Inter, sans-serif; cursor: pointer; color: var(--ink); }
+  .chips button.used { border-color: var(--ok); color: var(--ok); }
+
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+  .stats div { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px; }
+  .stats b { display: block; font-size: 24px; letter-spacing: -.5px; }
+  .stats span { font-size: 11px; color: var(--muted); }
+  .stats .main { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .stats .main span { color: #E9DCD3; }
+
+  .filters { display: flex; gap: 6px; margin: 14px 0 8px; flex-wrap: wrap; align-items: center; }
+  .filters label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; background: var(--card); border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 10px; cursor: pointer; }
+  .filters input { accent-color: var(--brand); }
+  .filters button { margin-left: auto; border: 0; background: var(--ink); color: #fff; border-radius: 999px; padding: 8px 12px; font: 600 12px Inter, sans-serif; cursor: pointer; }
+
+  .co { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; margin-bottom: 8px; animation: in .3s ease-out backwards; }
+  @keyframes in { from { opacity: 0; transform: translateY(6px); } }
+  .co .top { display: flex; gap: 10px; align-items: flex-start; }
+  .co b { font-size: 14px; display: block; }
+  .co small { color: var(--muted); font-size: 12px; display: block; line-height: 1.45; }
+  .co .rating { margin-left: auto; white-space: nowrap; font-size: 12px; font-weight: 600; }
+  .co .rating i { color: var(--star); font-style: normal; }
+  .co .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .co .tags span { font-size: 11px; border-radius: 999px; padding: 3px 8px; background: var(--bg); color: var(--muted); }
+  .co .tags span.warn { background: var(--soft); color: var(--brand-dark); }
+  .co .bottom { display: flex; gap: 6px; align-items: center; margin-top: 10px; }
+  .co select { padding: 7px 8px; border-radius: 10px; border: 1.5px solid var(--line); font: 12px Inter, sans-serif; background: #fff; }
+  .co .bottom button, .co .bottom a { border: 0; border-radius: 999px; padding: 8px 10px; font: 600 12px Inter, sans-serif; cursor: pointer; text-decoration: none; }
+  .co .bottom button { background: var(--soft); color: var(--brand-dark); margin-left: auto; }
+  .co .bottom a { background: var(--ink); color: #fff; }
+  .co .script { margin-top: 10px; background: var(--bg); border-radius: 12px; padding: 10px 12px; font-size: 13px; line-height: 1.55; white-space: pre-wrap; }
+  .co .script[hidden] { display: none; }
+  .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 24px; background: var(--card); border: 1px dashed var(--line); border-radius: 16px; }
+
+  .legal { margin-top: 16px; background: var(--soft); border-radius: 14px; padding: 12px 14px; font-size: 12.5px; line-height: 1.55; }
+  .legal b { color: var(--brand-dark); }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <small>PÂTISSERIE LES DÉLICES · COFFRETS DE FIN D'ANNÉE</small>
+    <h1>Trouver les entreprises à appeler</h1>
+    <p>Une recherche, une liste prête : nom, téléphone, note Google et le script d'appel.</p>
+  </header>
+
+  <form class="search" id="form">
+    <div class="row">
+      <input id="q" value="agences immobilières" aria-label="Type d'entreprise" required>
+      <input id="ville" value="Oran" aria-label="Ville" required>
+    </div>
+    <button type="submit" id="go">🔎 Chercher</button>
+    <div class="chips" id="chips"></div>
+  </form>
+
+  <div class="stats">
+    <div class="main"><b id="s-phone">0</b><span>avec téléphone</span></div>
+    <div><b id="s-total">0</b><span>entreprises trouvées</span></div>
+    <div><b id="s-called">0</b><span>déjà appelées</span></div>
+  </div>
+
+  <div class="filters">
+    <label><input type="checkbox" id="f-phone" checked>Avec téléphone</label>
+    <label><input type="checkbox" id="f-rating">Note ≥ 4</label>
+    <button type="button" id="csv">⬇︎ Exporter</button>
+  </div>
+  <div id="list"><div class="empty">Lancez une recherche pour remplir votre liste.</div></div>
+
+  <p class="legal"><b>Appeler et passer voir, oui. Emails et SMS en masse, prudence.</b> Les règles de prospection changent selon les pays (RGPD en France et en Belgique, LCAP au Canada). Présentez-vous toujours, et retirez de la liste toute entreprise qui le demande. Données de démonstration : la vraie liste vient de l'API Google Places (voir prospects.gs).</p>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Choisissez vos cibles : quelles entreprises offrent des cadeaux en fin d'année ?</li>
+      <li>Une recherche Google Maps par type et par ville remplit votre tableau.</li>
+      <li>Chaque entreprise reçoit son script d'appel personnalisé.</li>
+      <li>Vous appelez, vous notez le résultat : la liste vous dit qui rappeler.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  const SUGGESTIONS = ["agences immobilières", "cabinets d'avocats", "cliniques"];
+  const NOMS = {
+    "agences immobilières": ["Immo Oran Centre", "Agence El Bahia", "Habitat Plus", "Agence Les Palmiers", "Immobilière du Front de Mer", "Oran Immo Conseil", "Agence Ibn Khaldoun", "Résidence & Co", "Agence Saint-Hubert", "Immo Akid Lotfi", "Agence La Corniche", "Maison Sûre", "Agence Point du Jour", "Immo Gambetta", "Agence Bir El Djir", "Clé d'Or Immobilier", "Agence Millénium", "Immo Canastel", "Agence Les Amandiers", "Oranie Patrimoine"],
+    "cabinets d'avocats": ["Cabinet Benali & Associés", "Cabinet Me Hadjadj", "Cabinet Kaddour", "Cabinet Juridique El Bahia", "Me Bouziane Avocate", "Cabinet Cherif & Fils", "Cabinet Ould Ali", "Me Mansouri", "Cabinet Lazreg", "Cabinet du Palais", "Me Belkacem", "Cabinet Zerrouki", "Cabinet Sahraoui", "Me Taleb Avocat", "Cabinet Boudia", "Cabinet Atlas Conseil", "Me Hamidi", "Cabinet Larbi & Associés", "Cabinet Meziane", "Me Djelloul"],
+    "cliniques": ["Clinique El Hayat", "Clinique Les Oliviers", "Clinique Ibn Sina", "Polyclinique Front de Mer", "Clinique El Nour", "Clinique Es Salem", "Centre Médical Gambetta", "Clinique Les Pins", "Clinique Dentaire Sourire", "Clinique El Djazair", "Centre de Radiologie Oran", "Clinique Mère et Enfant", "Clinique El Amel", "Clinique Saint-Hubert", "Clinique Vision Plus", "Clinique El Wiam", "Centre Kiné Santé", "Clinique Canastel", "Clinique El Bahdja", "Clinique Les Roses"],
+  };
+  const QUARTIERS = ["Gambetta", "Akid Lotfi", "Front de Mer", "Saint-Hubert", "Bir El Djir", "Canastel", "Point du Jour", "Les Amandiers", "Hai Sabah", "Miramar", "Choupot", "Cité Djamel", "USTO", "Maraval", "Plateaux", "Haï Yasmine", "Sidi El Houari", "Delmonte", "Es Seddikia", "Belgaid"];
+  const ACCROCHES = {
+    "agences immobilières": "beaucoup d'agences offrent un coffret à leurs clients qui ont signé dans l'année",
+    "cabinets d'avocats": "beaucoup de cabinets remercient leurs clients et partenaires avec un cadeau de fin d'année",
+    "cliniques": "beaucoup de cliniques offrent un petit plaisir à leurs équipes pour les fêtes",
+  };
+  const STATUTS = ["À appeler", "Appelée", "Intéressée", "Pas intéressée"];
+
+  const $ = (id) => document.getElementById(id);
+  let societes = [];
+  const used = new Set();
+
+  // Résultats de démonstration, toujours les mêmes pour une même recherche.
+  function hash(s) { let h = 7; for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 100003; return h; }
+  function demoSearch(q, ville) {
+    const key = q.toLowerCase().trim();
+    const titre = key.charAt(0).toUpperCase() + key.slice(1).replace(/s\b/g, "");
+    const noms = NOMS[key] || QUARTIERS.map((qu) => `${titre} ${qu}`);
+    return noms.map((nom, i) => {
+      const h = hash(nom + ville);
+      const sansTel = h % 7 === 0;
+      return {
+        nom, type: key, adresse: `${QUARTIERS[(i * 7) % QUARTIERS.length]}, ${ville}`,
+        tel: sansTel ? "" : `041 ${String(20 + (h % 70)).padStart(2, "0")} ${String(h % 97).padStart(2, "0")} ${String((h >> 3) % 89).padStart(2, "0")}`,
+        site: h % 3 === 0 ? "" : `${nom.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z]+/g, "-").replace(/^-|-$/g, "")}.dz`,
+        note: Math.round((3.4 + (h % 16) / 10) * 10) / 10, avis: 5 + (h % 180), statut: "À appeler",
+      };
+    });
+  }
+
+  function script(s) {
+    const accroche = ACCROCHES[s.type] || "beaucoup d'entreprises offrent un cadeau de fin d'année à leurs clients ou à leurs équipes";
+    const bravo = s.note >= 4.5 && s.avis >= 30 ? `\n(Bravo pour vos ${s.note.toLocaleString("fr-FR")} étoiles sur Google, au passage !)` : "";
+    return `Bonjour, je suis [votre prénom], de la Pâtisserie Les Délices à Oran.\nJe vous appelle car ${accroche}.\nNous préparons des coffrets de pâtisseries maison, personnalisés à votre logo, livrés avant le 31 décembre.${bravo}\nJe peux vous envoyer le catalogue et les prix sur WhatsApp ?`;
+  }
+
+  function render() {
+    const fPhone = $("f-phone").checked, fRating = $("f-rating").checked;
+    const vis = societes.filter((s) => (!fPhone || s.tel) && (!fRating || s.note >= 4));
+    $("s-total").textContent = societes.length;
+    $("s-phone").textContent = societes.filter((s) => s.tel).length;
+    $("s-called").textContent = societes.filter((s) => s.statut !== "À appeler").length;
+    $("list").innerHTML = vis.length ? "" : '<div class="empty">Aucune entreprise avec ces filtres.</div>';
+    vis.forEach((s, i) => {
+      const el = document.createElement("article");
+      el.className = "co";
+      el.style.animationDelay = `${Math.min(i, 12) * 30}ms`;
+      el.innerHTML = `
+        <div class="top"><div><b></b><small></small></div><span class="rating"><i>★</i> ${s.note.toLocaleString("fr-FR")} <small style="display:inline">(${s.avis})</small></span></div>
+        <div class="tags"></div>
+        <div class="bottom"><select aria-label="Statut"></select><button type="button">📝 Script</button></div>
+        <div class="script" hidden></div>`;
+      el.querySelector("b").textContent = s.nom;
+      el.querySelector("small").textContent = `${s.adresse}${s.tel ? " · " + s.tel : ""}`;
+      const tags = el.querySelector(".tags");
+      [[s.type, ""], [s.site ? s.site : "pas de site web", s.site ? "" : "warn"], [s.tel ? "téléphone ✓" : "pas de téléphone", s.tel ? "" : "warn"]].forEach(([t, cls]) => {
+        const sp = document.createElement("span");
+        sp.className = cls;
+        sp.textContent = t;
+        tags.append(sp);
+      });
+      const sel = el.querySelector("select");
+      STATUTS.forEach((st) => sel.append(new Option(st, st, false, st === s.statut)));
+      sel.onchange = () => { s.statut = sel.value; $("s-called").textContent = societes.filter((x) => x.statut !== "À appeler").length; };
+      const box = el.querySelector(".script");
+      box.textContent = script(s);
+      el.querySelector(".bottom button").onclick = () => (box.hidden = !box.hidden);
+      if (s.tel) {
+        const a = document.createElement("a");
+        a.href = `tel:${s.tel.replace(/\s/g, "")}`;
+        a.textContent = "📞 Appeler";
+        el.querySelector(".bottom").append(a);
+      }
+      $("list").append(el);
+    });
+  }
+
+  $("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const q = $("q").value.trim(), ville = $("ville").value.trim();
+    $("go").disabled = true;
+    $("go").textContent = "Recherche sur Google Maps…";
+    await new Promise((r) => setTimeout(r, 900));
+    const nouveaux = demoSearch(q, ville).filter((n) => !societes.some((s) => s.nom === n.nom));
+    societes = societes.concat(nouveaux);
+    used.add(q.toLowerCase());
+    renderChips();
+    render();
+    $("go").disabled = false;
+    $("go").textContent = `🔎 Chercher (+${nouveaux.length})`;
+  });
+
+  function renderChips() {
+    $("chips").innerHTML = "";
+    SUGGESTIONS.forEach((s) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = (used.has(s) ? "✓ " : "+ ") + s;
+      if (used.has(s)) b.className = "used";
+      b.onclick = () => { $("q").value = s; $("form").requestSubmit(); };
+      $("chips").append(b);
+    });
+  }
+
+  $("f-phone").onchange = $("f-rating").onchange = render;
+  $("csv").onclick = () => {
+    const esc = (v) => `"${String(v).replace(/"/g, '""')}"`;
+    const rows = [["Nom", "Type", "Adresse", "Téléphone", "Site", "Note", "Avis", "Statut"], ...societes.map((s) => [s.nom, s.type, s.adresse, s.tel, s.site, s.note, s.avis, s.statut])];
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob(["﻿" + rows.map((r) => r.map(esc).join(";")).join("\n")], { type: "text/csv;charset=utf-8" }));
+    a.download = "prospects-fin-d-annee.csv";
+    a.click();
+  };
+  renderChips();
+</script>
+</body>
+</html>

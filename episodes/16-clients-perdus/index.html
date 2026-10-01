@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salon Jasmin — Clientes à faire revenir</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --soft: #FBEDE6; --ok: #1E7A42;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 28px 0 12px; }
+  header small { color: var(--brand-dark); font-weight: 600; letter-spacing: 1px; font-size: 12px; }
+  h1 { font: 600 27px Fraunces, serif; margin-top: 4px; }
+
+  .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px; }
+  .tile .label { font-size: 12px; color: var(--muted); }
+  .tile .value { font: 600 34px Inter, sans-serif; letter-spacing: -1px; margin-top: 2px; }
+  .tile .sub { font-size: 12px; color: var(--muted); }
+  .tile.accent { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .tile.accent .label, .tile.accent .sub { color: #E9DCD3; }
+  .tile.accent .value { font-size: 26px; }
+  .ctrl { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px; margin-top: 10px; display: grid; gap: 12px; }
+  .ctrl label { font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; }
+  .ctrl input[type=range] { width: 100%; accent-color: var(--brand); margin-top: 6px; }
+  .hint { font-size: 11px; color: var(--muted); }
+
+  h2 { font: 600 19px Fraunces, serif; margin: 26px 0 10px; display: flex; align-items: baseline; gap: 8px; }
+  h2 small { margin-left: auto; font: 500 13px Inter, sans-serif; color: var(--muted); }
+  textarea { width: 100%; min-height: 120px; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--line); font: inherit; font-size: 14px; line-height: 1.5; resize: vertical; }
+  textarea:focus { outline: none; border-color: var(--brand); }
+  .vars { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .vars code { font-size: 12px; background: var(--soft); color: var(--brand-dark); border-radius: 6px; padding: 3px 6px; }
+
+  .progress { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 4px 0 12px; }
+  .progress i { display: block; height: 100%; width: 0; background: var(--ok); transition: width .4s; }
+  .client { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; margin-bottom: 8px; }
+  .client.sent { opacity: .55; }
+  .client .top { display: flex; align-items: center; gap: 10px; }
+  .av { width: 36px; height: 36px; border-radius: 50%; background: var(--soft); color: var(--brand-dark); display: grid; place-items: center; font-weight: 700; flex-shrink: 0; }
+  .client b { display: block; font-size: 14px; }
+  .client small { color: var(--muted); font-size: 12px; }
+  .client a { margin-left: auto; background: #25D366; color: #fff; text-decoration: none; border-radius: 999px; padding: 8px 12px; font-weight: 600; font-size: 12px; white-space: nowrap; }
+  .client.sent a { background: var(--ok); }
+  .client p { margin-top: 10px; font-size: 13px; line-height: 1.5; background: #E7F8EC; border-radius: 12px 12px 12px 4px; padding: 10px 12px; white-space: pre-wrap; }
+  .more { width: 100%; padding: 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); font: 600 13px Inter, sans-serif; cursor: pointer; color: var(--ink); }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <small>SALON JASMIN · FICHIER CLIENTES</small>
+    <h1>Les clientes qui ne reviennent plus</h1>
+  </header>
+
+  <div class="hero">
+    <div class="tile"><div class="label">Pas revenues depuis</div><div class="value" id="count">0</div><div class="sub" id="count-sub"></div></div>
+    <div class="tile accent"><div class="label">Si <span id="rate-l"></span> reviennent</div><div class="value" id="money">0 DA</div><div class="sub">une visite chacune, au panier moyen</div></div>
+  </div>
+  <div class="ctrl">
+    <label for="days">Pas venues depuis <span id="days-l"></span></label>
+    <input type="range" id="days" min="30" max="180" step="15" value="60">
+    <label for="rate">Clientes qui reviennent après le message <span id="rate-v"></span></label>
+    <input type="range" id="rate" min="10" max="50" step="5" value="25">
+    <span class="hint">Hypothèse à régler vous-même : notez le vrai taux après le premier envoi.</span>
+  </div>
+
+  <h2>Le message</h2>
+  <textarea id="tpl">Bonjour {prénom} 🌸
+Ça fait {semaines} semaines depuis votre {prestation} ! {conseil}
+Je vous garde un créneau cette semaine ? Répondez simplement à ce message.
+Sonia, Salon Jasmin</textarea>
+  <div class="vars"><code>{prénom}</code><code>{prestation}</code><code>{semaines}</code><code>{conseil}</code></div>
+
+  <h2>À contacter <small id="sent-l"></small></h2>
+  <div class="progress"><i id="bar"></i></div>
+  <div id="list"></div>
+  <button class="more" id="more" type="button">Voir toutes les clientes</button>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Partez de votre fichier de rendez-vous : chaque cliente, sa dernière visite et sa dernière prestation.</li>
+      <li>Filtrez celles qui ne sont pas revenues depuis 60 jours.</li>
+      <li>Le message se personnalise tout seul : prénom, prestation, le bon conseil.</li>
+      <li>Un geste par cliente pour l'envoyer. Chaque lundi, la liste se met à jour.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  const PRESTATIONS = {
+    "Couleur": { prix: 5000, conseil: "Vos racines doivent commencer à se voir : c'est le bon moment pour une retouche." },
+    "Coupe + brushing": { prix: 2500, conseil: "Une coupe d'entretien et vos pointes vous diront merci." },
+    "Soin kératine": { prix: 9000, conseil: "Pour garder l'effet lisse, on conseille un soin d'entretien tous les 3 mois." },
+    "Manucure": { prix: 2000, conseil: "Vos mains méritent une pause : on vous refait une jolie manucure ?" },
+    "Brushing": { prix: 1200, conseil: "Un événement à venir ? Un brushing et vous êtes prête." },
+  };
+  const PRENOMS = ["Amina", "Sara", "Lina", "Yasmine", "Nadia", "Imane", "Rym", "Sonia", "Meriem", "Kenza", "Lydia", "Inès", "Samira", "Asma", "Feriel",
+    "Hanane", "Nesrine", "Soraya", "Leïla", "Dounia", "Yousra", "Chahinez", "Mélissa", "Katia", "Wafa", "Amel", "Selma", "Assia", "Hiba", "Manel",
+    "Narimane", "Djamila", "Farah", "Lamia", "Malika", "Zineb", "Sabrina", "Célia", "Rania", "Houda"];
+  const INITIALES = "BKMHSLTZDAR";
+  const NOMS_P = Object.keys(PRESTATIONS);
+
+  // 40 clientes d'exemple : 23 ne sont pas revenues depuis plus de 60 jours.
+  const CLIENTES = PRENOMS.map((p, i) => {
+    const jours = i < 23 ? 61 + ((i * 37) % 140) : 3 + ((i * 11) % 55);
+    const prestation = NOMS_P[(i * 7) % NOMS_P.length];
+    return { prenom: p, nom: `${p} ${INITIALES[i % INITIALES.length]}.`, tel: `05${50 + (i % 49)} ${String(10 + i).padStart(2, "0")} ${String(30 + i).padStart(2, "0")} ${String(70 - i).padStart(2, "0")}`,
+      prestation, jours, visites: 2 + ((i * 5) % 10), panier: PRESTATIONS[prestation].prix };
+  });
+
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => n.toLocaleString("fr-FR").replace(/ /g, " ");
+  const sent = new Set();
+  let showAll = false;
+
+  function message(c) {
+    return $("tpl").value
+      .replaceAll("{prénom}", c.prenom)
+      .replaceAll("{prestation}", c.prestation.toLowerCase())
+      .replaceAll("{semaines}", Math.round(c.jours / 7))
+      .replaceAll("{conseil}", PRESTATIONS[c.prestation].conseil);
+  }
+
+  function render() {
+    const days = Number($("days").value);
+    const rate = Number($("rate").value) / 100;
+    const cibles = CLIENTES.filter((c) => c.jours >= days).sort((a, b) => b.panier * b.visites - a.panier * a.visites);
+    const revient = Math.round(cibles.length * rate);
+    const moyenne = cibles.length ? cibles.reduce((s, c) => s + c.panier, 0) / cibles.length : 0;
+
+    $("days-l").textContent = `${days} jours`;
+    $("rate-v").textContent = `${Math.round(rate * 100)} %`;
+    $("rate-l").textContent = `${revient} sur ${cibles.length}`;
+    $("count").textContent = cibles.length;
+    $("count-sub").textContent = `clientes, sur ${CLIENTES.length}, depuis ${days} jours ou plus`;
+    $("money").textContent = `${fmt(Math.round(revient * moyenne / 100) * 100)} DA`;
+
+    const done = cibles.filter((c) => sent.has(c.nom)).length;
+    $("sent-l").textContent = `${done} / ${cibles.length} envoyés`;
+    $("bar").style.width = `${cibles.length ? (done / cibles.length) * 100 : 0}%`;
+
+    $("list").innerHTML = "";
+    (showAll ? cibles : cibles.slice(0, 5)).forEach((c) => {
+      const el = document.createElement("article");
+      el.className = "client" + (sent.has(c.nom) ? " sent" : "");
+      el.innerHTML = `<div class="top"><div class="av"></div><div><b></b><small></small></div><a target="_blank" rel="noopener"></a></div><p></p>`;
+      el.querySelector(".av").textContent = c.prenom[0];
+      el.querySelector("b").textContent = c.nom;
+      el.querySelector("small").textContent = `${c.prestation} · il y a ${c.jours} jours · ${c.visites} visites`;
+      el.querySelector("p").textContent = message(c);
+      const a = el.querySelector("a");
+      a.textContent = sent.has(c.nom) ? "Envoyé ✓" : "Envoyer";
+      a.href = `https://wa.me/${c.tel.replace(/\D/g, "").replace(/^0/, "213")}?text=${encodeURIComponent(message(c))}`;
+      a.addEventListener("click", () => { sent.add(c.nom); setTimeout(render, 50); });
+      $("list").append(el);
+    });
+    $("more").hidden = showAll || cibles.length <= 5;
+  }
+
+  $("days").oninput = $("rate").oninput = $("tpl").oninput = render;
+  $("more").onclick = () => { showAll = true; render(); };
+  render();
+</script>
+</body>
+</html>

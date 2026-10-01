@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Café Lumière — Une semaine de posts</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --soft: #FBEDE6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 28px 0 14px; }
+  header small { color: var(--brand-dark); font-weight: 600; letter-spacing: 1px; font-size: 12px; }
+  h1 { font: 600 27px Fraunces, serif; margin-top: 4px; }
+  header p { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 16px; }
+  .photo { aspect-ratio: 1; border-radius: 16px; overflow: hidden; position: relative; display: grid; place-items: center;
+    background: radial-gradient(circle at 30% 25%, #F6E7D9, transparent 55%), linear-gradient(140deg, #E9D3BF, #C9A585); }
+  .photo img { width: 100%; height: 100%; object-fit: cover; }
+  .photo .sample { font-size: 120px; filter: drop-shadow(0 18px 24px #5a3a2460); }
+  .photo .tag { position: absolute; left: 10px; bottom: 10px; background: #ffffffe8; border-radius: 999px; padding: 5px 10px; font-size: 12px; font-weight: 600; }
+  .pick { display: flex; gap: 8px; margin-top: 10px; }
+  .pick label, .pick button { flex: 1; text-align: center; padding: 11px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); font: 600 13px Inter, sans-serif; cursor: pointer; color: var(--ink); }
+  .pick input { display: none; }
+  label.field { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
+  textarea { width: 100%; min-height: 64px; padding: 11px 13px; border-radius: 12px; border: 1.5px solid var(--line); font: inherit; font-size: 15px; resize: vertical; }
+  textarea:focus { outline: none; border-color: var(--brand); }
+  .btn { width: 100%; margin-top: 14px; padding: 15px; border: 0; border-radius: 999px; background: var(--brand); color: #fff; font: 600 15px Inter, sans-serif; cursor: pointer; }
+  .btn:hover { background: var(--brand-dark); }
+  .btn:disabled { opacity: .6; cursor: default; }
+
+  #out { margin-top: 22px; display: grid; gap: 12px; }
+  .block { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px; animation: rise .45s ease-out backwards; }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+  .block h2 { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+  .block h2 button { margin-left: auto; border: 0; background: var(--soft); color: var(--brand-dark); border-radius: 999px; padding: 6px 10px; font: 600 12px Inter, sans-serif; cursor: pointer; }
+  .txt { white-space: pre-wrap; font-size: 14px; line-height: 1.55; }
+
+  .ig { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .ig .bar { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: 13px; font-weight: 600; }
+  .ig .bar i { width: 26px; height: 26px; border-radius: 50%; background: var(--brand); display: inline-grid; place-items: center; color: #fff; font: 600 13px Fraunces, serif; font-style: normal; }
+  .ig .photo { border-radius: 0; }
+  .ig .photo .sample { font-size: 90px; }
+  .ig .txt { padding: 10px; font-size: 13px; }
+
+  .stories { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .story { aspect-ratio: 9 / 16; border-radius: 12px; overflow: hidden; position: relative; background: linear-gradient(160deg, #3b2b22, #CF7652); color: #fff; display: flex; align-items: flex-end; }
+  .story img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .75; }
+  .story .sample { position: absolute; top: 18%; left: 50%; transform: translateX(-50%); font-size: 44px; }
+  .story span { position: relative; margin: 8px; background: #000a; border-radius: 8px; padding: 6px; font-size: 11px; line-height: 1.35; font-weight: 600; }
+  .wa { background: #E7F8EC; border-radius: 14px 14px 14px 4px; padding: 10px 12px; font-size: 14px; }
+  .reel ol { padding-left: 18px; display: grid; gap: 6px; font-size: 14px; line-height: 1.5; margin-top: 8px; }
+  .reel .hook { font: 600 16px Fraunces, serif; }
+  .plan { list-style: none; display: grid; gap: 6px; }
+  .plan li { display: flex; gap: 10px; font-size: 13px; line-height: 1.45; padding: 8px 10px; background: var(--bg); border-radius: 10px; }
+  .plan li b { min-width: 70px; color: var(--brand-dark); }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <small>CAFÉ LUMIÈRE · CONTENU</small>
+    <h1>Une photo, une semaine de posts</h1>
+    <p>Une photo et une phrase. L'IA écrit tout le reste.</p>
+  </header>
+
+  <div class="card">
+    <div class="photo" id="preview"><span class="sample" aria-hidden="true">🍵</span><span class="tag">Photo d'exemple</span></div>
+    <div class="pick">
+      <label>📷 Ma photo<input type="file" id="file" accept="image/*"></label>
+      <button type="button" id="sample">Photo d'exemple</button>
+    </div>
+    <label class="field" for="idee">Votre idée en une phrase</label>
+    <textarea id="idee">Nouveau latte pistache, disponible jusqu'à dimanche.</textarea>
+    <button class="btn" id="go">✨ Créer ma semaine</button>
+  </div>
+
+  <div id="out" aria-live="polite"></div>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Prenez une photo de votre produit, à la lumière du jour.</li>
+      <li>Écrivez votre idée en une phrase : le produit, la nouveauté, la date.</li>
+      <li>L'IA écrit tout : post, stories, statut WhatsApp, post Google et Reel.</li>
+      <li>Vous copiez, vous publiez, et le planning vous dit quoi poster chaque jour.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  // Adresse du serveur IA (outils/ia-worker). Vide = textes d'exemple, sans IA.
+  const AI_ENDPOINT = "";
+  const $ = (id) => document.getElementById(id);
+  let photoURL = null;   // aperçu dans la page
+  let photoB64 = null;   // photo réduite envoyée à l'IA (si serveur)
+
+  const SAMPLE_HTML = '<span class="sample" aria-hidden="true">🍵</span>';
+  const photoHTML = () => (photoURL ? `<img src="${photoURL}" alt="">` : SAMPLE_HTML);
+
+  // La photo est réduite à 768 px dans le navigateur avant l'envoi : plus rapide, moins cher.
+  $("file").addEventListener("change", () => {
+    const file = $("file").files[0];
+    if (!file) return;
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, 768 / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      photoURL = canvas.toDataURL("image/jpeg", 0.82);
+      photoB64 = photoURL.split(",")[1];
+      $("preview").innerHTML = photoHTML();
+    };
+    img.src = URL.createObjectURL(file);
+  });
+  $("sample").onclick = () => {
+    photoURL = photoB64 = null;
+    $("file").value = "";
+    $("preview").innerHTML = SAMPLE_HTML + '<span class="tag">Photo d\'exemple</span>';
+  };
+
+  // Textes d'exemple quand il n'y a pas de serveur IA (avec le serveur, Claude les écrit en voyant la photo).
+  function demo(idee) {
+    const propre = idee.trim().replace(/\.$/, "");
+    const [produit, ...reste] = propre.split(/,|—| - /);
+    const detail = reste.join(",").trim();
+    const Detail = detail ? detail.charAt(0).toUpperCase() + detail.slice(1) : "";
+    const finDimanche = /dimanche/i.test(detail);
+    return {
+      instagram: `${produit.trim()} ✨\n${Detail ? Detail + ".\n" : ""}\nDoux, gourmand, préparé minute par nos baristas. On vous le sert sur place ou à emporter.\n\n#cafelumiere #coffeetime #cafe #gourmandise`,
+      stories: [produit.trim(), Detail || "Préparé minute, rien que pour vous", "Sur place ou à emporter ? Répondez au sondage 👇"],
+      whatsapp: `${produit.trim()} ✨ ${Detail ? Detail + ". " : ""}On vous attend !`,
+      google: `${produit.trim()} au Café Lumière.${Detail ? " " + Detail + "." : ""} Ouvert tous les jours de 7h à 20h, sur place ou à emporter.`,
+      reel: {
+        accroche: `On vous montre comment on prépare notre ${produit.trim().replace(/^nouveau |^nouvelle /i, "").toLowerCase()} ?`,
+        plans: ["Gros plan : le geste du barista, la mousse qui se dépose", "Le produit fini sur le comptoir, à la lumière du jour", "Un client qui goûte et sourit (demandez-lui avant de filmer)"],
+      },
+      planning: [
+        "Lundi : post Instagram avec la photo et la légende",
+        "Mardi : story sondage « sur place ou à emporter ? »",
+        "Mercredi : Reel de la préparation, en 3 plans",
+        "Jeudi : statut WhatsApp et post Google",
+        "Vendredi : story d'un client qui goûte",
+        "Samedi : story coulisses de la préparation du matin",
+        finDimanche ? "Dimanche : « dernier jour ! » en story et en statut" : "Dimanche : story pour remercier ceux qui sont passés",
+      ],
+    };
+  }
+
+  async function ia(idee) {
+    const body = { mode: "contenu", commerce: "cafe-lumiere", idee };
+    if (photoB64) body.image = { media_type: "image/jpeg", data: photoB64 };
+    const res = await fetch(AI_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const data = await res.json();
+    if (!res.ok || !data.resultat) throw new Error(data.erreur || "Erreur");
+    return data.resultat;
+  }
+
+  function block(title, copyText, inner, delay) {
+    const el = document.createElement("section");
+    el.className = "block";
+    el.style.animationDelay = `${delay}ms`;
+    el.innerHTML = `<h2><span></span><button type="button">Copier</button></h2>`;
+    el.querySelector("span").textContent = title;
+    el.querySelector("button").onclick = (e) => {
+      navigator.clipboard?.writeText(copyText).then(() => { e.target.textContent = "Copié ✓"; setTimeout(() => (e.target.textContent = "Copier"), 1500); }).catch(() => {});
+    };
+    el.append(inner);
+    $("out").append(el);
+  }
+  const div = (cls, text) => { const d = document.createElement("div"); d.className = cls; if (text !== undefined) d.textContent = text; return d; };
+
+  $("go").onclick = async () => {
+    const idee = $("idee").value.trim();
+    if (!idee) return $("idee").focus();
+    $("go").disabled = true;
+    $("go").textContent = "L'IA écrit votre semaine…";
+    let r;
+    try { r = AI_ENDPOINT ? await ia(idee) : demo(idee); } catch { r = demo(idee); }
+    if (!AI_ENDPOINT) await new Promise((ok) => setTimeout(ok, 900));
+    $("out").innerHTML = "";
+
+    const ig = div("ig");
+    ig.innerHTML = `<div class="bar"><i>L</i>cafelumiere</div><div class="photo">${photoHTML()}</div>`;
+    ig.append(div("txt", r.instagram));
+    block("📸 Post Instagram", r.instagram, ig, 0);
+
+    const st = div("stories");
+    r.stories.slice(0, 3).forEach((s) => {
+      const one = div("story");
+      one.innerHTML = photoURL ? `<img src="${photoURL}" alt="">` : '<span class="sample" aria-hidden="true">🍵</span>';
+      one.append(Object.assign(document.createElement("span"), { textContent: s }));
+      st.append(one);
+    });
+    block("📱 3 stories", r.stories.join("\n\n"), st, 120);
+    block("🟢 Statut WhatsApp", r.whatsapp, div("wa", r.whatsapp), 240);
+    block("📍 Post Google", r.google, div("txt", r.google), 360);
+
+    const reel = div("reel");
+    reel.append(div("hook", `« ${r.reel.accroche} »`));
+    const ol = document.createElement("ol");
+    r.reel.plans.forEach((p) => ol.append(Object.assign(document.createElement("li"), { textContent: p })));
+    reel.append(ol);
+    block("🎬 Script de Reel", `${r.reel.accroche}\n${r.reel.plans.map((p, i) => `${i + 1}. ${p}`).join("\n")}`, reel, 480);
+
+    const plan = document.createElement("ul");
+    plan.className = "plan";
+    r.planning.slice(0, 7).forEach((line) => {
+      const li = document.createElement("li");
+      const [jour, ...rest] = line.split(":");
+      li.innerHTML = "<b></b><span></span>";
+      li.querySelector("b").textContent = jour.trim();
+      li.querySelector("span").textContent = rest.join(":").trim();
+      plan.append(li);
+    });
+    block("🗓️ Votre semaine", r.planning.join("\n"), plan, 600);
+
+    $("go").disabled = false;
+    $("go").textContent = "✨ Une autre version";
+    $("out").scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+</script>
+</body>
+</html>

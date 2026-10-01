@@ -133,7 +133,7 @@ Every Sunday, spend 15 minutes on these four numbers and change one thing for th
 - [ ] Week 1 check (Sun 11 Oct)
 - [ ] Week 2 check (Sun 18 Oct)
 - [ ] Week 3 check (Sun 25 Oct)
-- [ ] Month review and November plan (Sun 1 Nov)
+- [ ] Month review and November plan (Sun 1 Nov): draft ready in [`PLAN-NOVEMBRE-2026.md`](PLAN-NOVEMBRE-2026.md)
 
 ### Weekly numbers
 

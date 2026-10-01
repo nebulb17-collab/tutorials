@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salon Jasmin — Rapport du lundi</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --soft: #FBEDE6; --up: #1E7A42; --down: #B3261E;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 28px 0 12px; }
+  header small { color: var(--brand-dark); font-weight: 600; letter-spacing: 1px; font-size: 12px; }
+  h1 { font: 600 27px Fraunces, serif; margin-top: 4px; }
+  header p { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+  .weeks { display: flex; gap: 6px; margin: 6px 0 14px; }
+  .weeks button { flex: 1; padding: 9px 6px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); font: 500 12px Inter, sans-serif; cursor: pointer; color: var(--ink); }
+  .weeks button[aria-pressed=true] { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+  .mail { background: var(--card); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; box-shadow: 0 24px 50px -32px #6b3a2470; transition: opacity .2s; }
+  .mail-head { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; gap: 10px; align-items: center; }
+  .mail-head i { width: 36px; height: 36px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; font: 600 17px Fraunces, serif; font-style: normal; flex-shrink: 0; }
+  .mail-head b { display: block; font-size: 14px; }
+  .mail-head small { color: var(--muted); font-size: 12px; }
+  .mail-head time { margin-left: auto; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .mail-body { padding: 16px; }
+  .mail-body h2 { font: 600 20px Fraunces, serif; }
+  .mail-body > p { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+  .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .kpi { background: var(--bg); border-radius: 14px; padding: 12px; }
+  .kpi .label { font-size: 12px; color: var(--muted); }
+  .kpi .value { font: 600 24px Inter, sans-serif; letter-spacing: -.5px; margin-top: 2px; }
+  .kpi .delta { font-size: 12px; font-weight: 600; margin-top: 2px; }
+  .kpi .delta.good { color: var(--up); } .kpi .delta.bad { color: var(--down); } .kpi .delta.flat { color: var(--muted); }
+  .kpi.wide { grid-column: 1 / -1; }
+
+  .rows { margin-top: 14px; display: grid; gap: 8px; font-size: 14px; }
+  .rows div { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+  .rows span:first-child { color: var(--muted); }
+  .rows span:last-child { font-weight: 600; text-align: right; }
+  .tip { margin-top: 14px; background: var(--ink); color: #fff; border-radius: 14px; padding: 12px 14px; font-size: 14px; line-height: 1.5; }
+  .tip b { color: var(--brand); display: block; font-size: 12px; letter-spacing: .8px; text-transform: uppercase; margin-bottom: 4px; }
+
+  .src { margin-top: 18px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px; font-size: 13px; line-height: 1.55; }
+  .src b { display: block; font: 600 16px Fraunces, serif; margin-bottom: 6px; }
+  .src ul { padding-left: 18px; color: var(--muted); }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <small>SALON JASMIN · CHAQUE LUNDI À 8H</small>
+    <h1>Votre semaine en un message</h1>
+    <p>Le script lit vos tableaux et vous écrit le résumé. Vous le lisez avec votre café.</p>
+  </header>
+
+  <div class="weeks" id="weeks" role="group" aria-label="Semaine"></div>
+
+  <article class="mail" id="mail" aria-live="polite">
+    <div class="mail-head"><i>J</i><div><b>Rapport du lundi</b><small>pour Sonia · Salon Jasmin</small></div><time id="sent"></time></div>
+    <div class="mail-body">
+      <h2 id="title"></h2>
+      <p id="period"></p>
+      <div class="kpis" id="kpis"></div>
+      <div class="rows" id="rows"></div>
+      <div class="tip" id="tip"></div>
+    </div>
+  </article>
+
+  <section class="src">
+    <b>D'où viennent les chiffres</b>
+    <ul>
+      <li>Rendez-vous, chiffre et absences : l'onglet « Réservations » (épisode 4).</li>
+      <li>Nouvelles clientes et leur source : la première visite de chaque numéro.</li>
+      <li>Avis : le compteur de votre fiche Google, noté chaque lundi.</li>
+    </ul>
+  </section>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Vos rendez-vous et vos clientes sont déjà dans Google Sheets.</li>
+      <li>Le script compte la semaine : rendez-vous, chiffre, absences, nouvelles clientes.</li>
+      <li>Il compare avec la semaine d'avant et propose une action.</li>
+      <li>Chaque lundi à 8h, le résumé arrive tout seul dans votre boîte.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  const PRIX = { "Coupe + brushing": 2500, "Brushing": 1200, "Couleur": 5000, "Soin kératine": 9000, "Manucure": 2000 };
+  const SERVICES = Object.keys(PRIX);
+  const SOURCES = ["Instagram", "Google", "Bouche-à-oreille", "TikTok"];
+  const JOURS = ["mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => n.toLocaleString("fr-FR").replace(/ /g, " ");
+
+  // 5 semaines de rendez-vous d'exemple, toujours les mêmes (générateur à graine fixe).
+  let seed = 42;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const semaines = [];
+  let clienteId = 0;
+  const connues = [];
+  for (let w = 0; w < 5; w++) {
+    const rdv = [];
+    const n = 34 + Math.floor(rnd() * 16) + w * 2;
+    for (let i = 0; i < n; i++) {
+      const jour = rnd() < 0.3 ? 4 : Math.floor(rnd() * 6); // le samedi est plus chargé
+      const heure = 9 + Math.floor(rnd() * 9);
+      const nouvelle = rnd() < 0.22 || !connues.length;
+      const cliente = nouvelle ? ++clienteId : connues[Math.floor(rnd() * connues.length)];
+      if (nouvelle) connues.push(cliente);
+      const r = rnd();
+      rdv.push({ jour, heure, cliente, nouvelle, source: SOURCES[Math.floor(rnd() * rnd() * SOURCES.length)],
+        prestation: SERVICES[Math.floor(rnd() * SERVICES.length)], statut: r < 0.05 ? "Annulé" : r < 0.05 + 0.03 + w * 0.012 ? "Absente" : "Venue" });
+    }
+    semaines.push({ rdv, avis: 2 + Math.floor(rnd() * 6), note: Math.round((4.6 + rnd() * 0.35) * 10) / 10 });
+  }
+
+  function stats(s) {
+    const actifs = s.rdv.filter((r) => r.statut !== "Annulé");
+    const venues = actifs.filter((r) => r.statut === "Venue");
+    const parSource = {};
+    actifs.filter((r) => r.nouvelle).forEach((r) => (parSource[r.source] = (parSource[r.source] || 0) + 1));
+    const creneaux = {};
+    actifs.forEach((r) => { const k = `${JOURS[r.jour]} ${r.heure < 12 ? "matin" : "après-midi"}`; creneaux[k] = (creneaux[k] || 0) + 1; });
+    const top = (o) => Object.entries(o).sort((a, b) => b[1] - a[1])[0] || ["—", 0];
+    return {
+      rdv: actifs.length, ca: venues.reduce((t, r) => t + PRIX[r.prestation], 0),
+      absences: actifs.filter((r) => r.statut === "Absente").length, nouvelles: actifs.filter((r) => r.nouvelle).length,
+      parSource, topSource: top(parSource), topCreneau: top(creneaux), avis: s.avis, note: s.note,
+      topService: top(venues.reduce((o, r) => ((o[r.prestation] = (o[r.prestation] || 0) + 1), o), {})),
+    };
+  }
+
+  function delta(cur, prev, upIsGood = true) {
+    if (!prev) return { txt: "—", cls: "flat" };
+    const pct = Math.round(((cur - prev) / prev) * 100);
+    if (pct === 0) return { txt: "= stable", cls: "flat" };
+    const good = (pct > 0) === upIsGood;
+    return { txt: `${pct > 0 ? "▲" : "▼"} ${Math.abs(pct)} % vs semaine d'avant`, cls: good ? "good" : "bad" };
+  }
+
+  function conseil(s, p) {
+    if (s.absences >= 3 && s.absences > p.absences) return `${s.absences} absences cette semaine (${p.absences} la semaine d'avant). Activez le rappel la veille à 18h : c'est l'épisode 5.`;
+    if (s.topCreneau[1] >= 10) return `Le ${s.topCreneau[0]} est votre moment le plus demandé (${s.topCreneau[1]} rendez-vous). Ouvrez un créneau de plus ce jour-là.`;
+    return `${s.topSource[0]} vous a amené le plus de nouvelles clientes (${s.topSource[1]}). Publiez-y deux fois de plus cette semaine.`;
+  }
+
+  // La semaine « S-1 » est la dernière semaine terminée (du lundi au dimanche).
+  function bornes(offset) {
+    const d = new Date();
+    const lundi = new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7));
+    const debut = new Date(lundi.getTime() - offset * 7 * 864e5);
+    const fin = new Date(debut.getTime() + 6 * 864e5);
+    return { debut, fin, envoi: new Date(fin.getTime() + 864e5) };
+  }
+
+  let offset = 1;
+  function render() {
+    const i = 5 - offset;
+    const s = stats(semaines[i]), p = stats(semaines[i - 1]);
+    const { debut, fin, envoi } = bornes(offset);
+    const f = (d) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
+    $("sent").textContent = `lun. ${envoi.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} · 08:00`;
+    $("title").textContent = "📊 Votre semaine";
+    $("period").textContent = `Du lundi ${f(debut)} au dimanche ${f(fin)}`;
+
+    const kpis = [
+      ["Rendez-vous", fmt(s.rdv), delta(s.rdv, p.rdv)],
+      ["Chiffre d'affaires", `${fmt(s.ca)} DA`, delta(s.ca, p.ca)],
+      ["Absences", fmt(s.absences), delta(s.absences, p.absences, false)],
+      ["Nouvelles clientes", fmt(s.nouvelles), delta(s.nouvelles, p.nouvelles)],
+    ];
+    $("kpis").innerHTML = "";
+    kpis.forEach(([label, value, d]) => {
+      const el = document.createElement("div");
+      el.className = "kpi";
+      el.innerHTML = `<div class="label"></div><div class="value"></div><div class="delta ${d.cls}"></div>`;
+      el.children[0].textContent = label;
+      el.children[1].textContent = value;
+      el.children[2].textContent = d.txt;
+      $("kpis").append(el);
+    });
+
+    const sources = Object.entries(s.parSource).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(" · ") || "—";
+    $("rows").innerHTML = "";
+    [["Nouvelles clientes venues de", sources], ["Prestation n°1", `${s.topService[0]} (${s.topService[1]})`],
+     ["Moment le plus demandé", `${s.topCreneau[0]} (${s.topCreneau[1]})`], ["Avis Google", `+${s.avis} · note ${s.note.toLocaleString("fr-FR")} ★`]]
+      .forEach(([k, v]) => { const d = document.createElement("div"); d.innerHTML = "<span></span><span></span>"; d.children[0].textContent = k; d.children[1].textContent = v; $("rows").append(d); });
+    $("tip").innerHTML = "<b>Une action pour cette semaine</b>";
+    $("tip").append(conseil(s, p));
+  }
+
+  [3, 2, 1].forEach((o) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    const { debut } = bornes(o);
+    b.textContent = o === 1 ? "Semaine dernière" : `Sem. du ${debut.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`;
+    b.setAttribute("aria-pressed", o === offset);
+    b.onclick = () => {
+      offset = o;
+      document.querySelectorAll("#weeks button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+      $("mail").style.opacity = .4;
+      setTimeout(() => { render(); $("mail").style.opacity = 1; }, 150);
+    };
+    $("weeks").append(b);
+  });
+  render();
+</script>
+</body>
+</html>

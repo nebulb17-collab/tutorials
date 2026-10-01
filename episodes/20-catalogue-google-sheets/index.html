@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boutique Atlas — Catalogue</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --soft: #FBEDE6; --ok: #1E7A42; --sheet: #188038;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 24px 0 10px; text-align: center; }
+  .brandname { font: 600 20px Fraunces, serif; letter-spacing: 2px; }
+  header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .synced { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; color: var(--sheet); background: #E6F4EA; border-radius: 999px; padding: 4px 10px; }
+  .synced::before { content: "●"; animation: blink 1.5s infinite; }
+  @keyframes blink { 50% { opacity: .25; } }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .p { background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; transition: box-shadow .3s; }
+  .p.changed { box-shadow: 0 0 0 3px #CF765266; }
+  .img { aspect-ratio: 1; display: grid; place-items: center; font-size: 56px; position: relative; }
+  .img img { width: 100%; height: 100%; object-fit: cover; }
+  .badge { position: absolute; top: 8px; left: 8px; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 3px 8px; background: #fff; }
+  .badge.low { background: #FFEDD5; color: #C2410C; }
+  .badge.out { background: var(--ink); color: #fff; }
+  .p.out .img > :not(.badge) { filter: grayscale(.8); opacity: .5; }
+  .info { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .info b { font-size: 14px; }
+  .info .price { color: var(--brand-dark); font-weight: 600; font-size: 14px; }
+  .info .price.flash { animation: price 1.2s ease-out; }
+  @keyframes price { 0% { background: #FCE8B2; } }
+  .info a, .info button { margin-top: auto; padding: 9px; border-radius: 999px; border: 0; text-align: center; text-decoration: none; font: 600 12px Inter, sans-serif; cursor: pointer; }
+  .info a { background: var(--brand); color: #fff; }
+  .info button { background: var(--card); color: var(--ink); border: 1.5px solid var(--ink); }
+  .info .spacer { height: 8px; }
+
+  .alert { position: fixed; inset: 0; background: #2A211Ccc; display: grid; place-items: center; padding: 16px; z-index: 10; }
+  .alert[hidden] { display: none; }
+  .alert form { background: var(--card); border-radius: 22px; padding: 20px; width: 100%; max-width: 360px; }
+  .alert h3 { font: 600 20px Fraunces, serif; }
+  .alert p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .alert input[type=text], .alert input[type=tel] { width: 100%; padding: 11px 13px; border-radius: 12px; border: 1.5px solid var(--line); font: inherit; font-size: 15px; margin-top: 10px; }
+  .alert label { display: flex; gap: 8px; font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.4; }
+  .alert label input { accent-color: var(--brand); }
+  .alert .row { display: flex; gap: 8px; margin-top: 14px; }
+  .alert .row button { flex: 1; padding: 12px; border-radius: 999px; border: 0; font: 600 14px Inter, sans-serif; cursor: pointer; }
+  .alert .row .ok { background: var(--brand); color: #fff; }
+  .alert .row .no { background: var(--card); border: 1.5px solid var(--line); }
+
+  .sheet { margin-top: 26px; border-radius: 16px; overflow: hidden; border: 1px solid #DADCE0; background: #fff; }
+  .sheet-bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #E6F4EA; font-size: 13px; font-weight: 600; color: var(--sheet); }
+  .sheet-bar .dot { width: 18px; height: 22px; border-radius: 3px; background: var(--sheet); position: relative; flex-shrink: 0; }
+  .sheet-bar .dot::after { content: ""; position: absolute; inset: 6px 4px; border: 1.5px solid #fff; border-radius: 1px; }
+  .sheet-bar span:last-child { margin-left: auto; font-weight: 500; color: var(--muted); font-size: 11px; }
+  .sheet table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .sheet th, .sheet td { border: 1px solid #E3E3E3; padding: 0; }
+  .sheet th { background: #F8F9FA; color: #5F6368; font-weight: 500; padding: 6px; text-align: left; }
+  .sheet td:first-child, .sheet th:first-child { background: #F8F9FA; color: #5F6368; text-align: center; width: 26px; padding: 6px 0; }
+  .sheet input { width: 100%; border: 0; padding: 7px 6px; font: 12px Inter, sans-serif; background: transparent; color: var(--ink); }
+  .sheet input:focus { outline: 2px solid #1a73e8; outline-offset: -2px; background: #fff; }
+  .sheet td.num input { text-align: right; font-variant-numeric: tabular-nums; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .notify { margin-top: 12px; background: var(--ink); color: #fff; border-radius: 16px; padding: 14px; animation: in .4s ease-out; }
+  @keyframes in { from { transform: translateY(8px); opacity: 0; } }
+  .notify b { display: block; margin-bottom: 8px; }
+  .notify a { display: flex; justify-content: space-between; background: #ffffff14; color: #fff; text-decoration: none; border-radius: 10px; padding: 8px 10px; font-size: 13px; margin-top: 6px; }
+  .notify a span:last-child { color: #8ee0a8; font-weight: 600; }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brandname">BOUTIQUE ATLAS</div>
+    <p>Nouvelle collection · commande sur WhatsApp</p>
+    <span class="synced" id="synced">Synchronisé avec Google Sheets</span>
+  </header>
+
+  <div class="grid" id="grid"></div>
+
+  <section class="sheet" aria-label="Aperçu de la feuille Google Sheets">
+    <div class="sheet-bar"><span class="dot"></span>Catalogue — Boutique Atlas<span>modifiez une case ↓</span></div>
+    <table>
+      <thead><tr><th></th><th>A · Produit</th><th>B · Prix (DA)</th><th>C · Stock</th></tr></thead>
+      <tbody id="sheet"></tbody>
+    </table>
+  </section>
+  <p class="hint">Changez un prix ou un stock : le catalogue au-dessus se met à jour. Remettez du stock sur un produit épuisé pour voir qui prévenir.</p>
+  <div id="notify"></div>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Votre catalogue dans Google Sheets : produit, prix, stock, photo.</li>
+      <li>Publiez la feuille : votre site la lit et se met à jour tout seul.</li>
+      <li>Stock bas ou épuisé : « Plus que 2 » ou « Me prévenir » s'affichent automatiquement.</li>
+      <li>Quand le stock revient, vous recevez la liste des clientes à prévenir.</li>
+    </ol>
+  </section>
+</div>
+
+<div class="alert" id="alert" hidden role="dialog" aria-modal="true" aria-labelledby="alert-title">
+  <form id="alert-form">
+    <h3 id="alert-title">Me prévenir</h3>
+    <p id="alert-sub"></p>
+    <input type="text" id="a-prenom" placeholder="Prénom" aria-label="Prénom" required>
+    <input type="tel" id="a-tel" placeholder="WhatsApp" aria-label="WhatsApp" required>
+    <label><input type="checkbox" id="a-ok" required>J'accepte un message WhatsApp quand ce produit est de retour.</label>
+    <div class="row"><button class="no" type="button" id="a-cancel">Annuler</button><button class="ok" type="submit">Me prévenir</button></div>
+  </form>
+</div>
+
+<script>
+  // Lien CSV de votre feuille publiée (Fichier → Partager → Publier sur le Web → CSV). Vide = démo modifiable.
+  const SHEET_CSV_URL = "";
+  // Application Web de stock.gs pour enregistrer les demandes « Me prévenir ». Vide = démo.
+  const SCRIPT_URL = "";
+  const WHATSAPP = "213000000000";
+
+  let produits = [
+    { nom: "Robe Kaftan Sahara", prix: 4900, stock: 6, emoji: "👗", fond: "linear-gradient(135deg,#F3E1D4,#E9C9B4)" },
+    { nom: "Sac cabas tressé", prix: 3200, stock: 2, emoji: "👜", fond: "linear-gradient(135deg,#EFE6D6,#D9C3A0)" },
+    { nom: "Foulard soie Atlas", prix: 1800, stock: 0, emoji: "🧣", fond: "linear-gradient(135deg,#E8DDF0,#C9B3D9)" },
+    { nom: "Sandales cuir", prix: 3900, stock: 9, emoji: "👡", fond: "linear-gradient(135deg,#F2DCD3,#D9A48F)" },
+    { nom: "Boucles dorées", prix: 1500, stock: 3, emoji: "✨", fond: "linear-gradient(135deg,#FBF0D5,#E8C877)" },
+    { nom: "Veste lin écru", prix: 5600, stock: 0, emoji: "🧥", fond: "linear-gradient(135deg,#ECE8E0,#CFC6B5)" },
+  ];
+  // Demandes « Me prévenir » déjà reçues (démo).
+  const alertes = SHEET_CSV_URL ? {} : { "Foulard soie Atlas": [{ prenom: "Amina", tel: "0550 12 34 56" }, { prenom: "Kenza", tel: "0770 98 76 54" }], "Veste lin écru": [{ prenom: "Rym", tel: "0661 22 33 44" }] };
+
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => n.toLocaleString("fr-FR").replace(/ /g, " ") + " DA";
+  let changed = null, priceChanged = null;
+
+  function renderGrid() {
+    $("grid").innerHTML = "";
+    produits.forEach((p) => {
+      const out = p.stock <= 0, low = !out && p.stock <= 3;
+      const el = document.createElement("article");
+      el.className = "p" + (out ? " out" : "") + (changed === p.nom ? " changed" : "");
+      el.innerHTML = `<div class="img"></div><div class="info"><b></b><span class="price${priceChanged === p.nom ? " flash" : ""}">${fmt(p.prix)}</span><span class="spacer"></span></div>`;
+      const img = el.querySelector(".img");
+      img.style.background = p.fond || "var(--soft)";
+      if (p.image) img.append(Object.assign(document.createElement("img"), { alt: "", src: p.image })); else img.textContent = p.emoji || "🛍️";
+      if (out || low) img.insertAdjacentHTML("beforeend", `<span class="badge ${out ? "out" : "low"}">${out ? "Épuisé" : `Plus que ${p.stock}`}</span>`);
+      el.querySelector("b").textContent = p.nom;
+      if (out) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = "🔔 Me prévenir";
+        b.onclick = () => openAlert(p);
+        el.querySelector(".info").append(b);
+      } else {
+        const a = document.createElement("a");
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = "Commander";
+        a.href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Bonjour Boutique Atlas ! Je voudrais commander : ${p.nom} (${fmt(p.prix)}).`)}`;
+        el.querySelector(".info").append(a);
+      }
+      $("grid").append(el);
+    });
+  }
+
+  function renderSheet() {
+    $("sheet").innerHTML = "";
+    produits.forEach((p, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${i + 2}</td><td><input data-k="nom"></td><td class="num"><input data-k="prix" inputmode="numeric"></td><td class="num"><input data-k="stock" inputmode="numeric"></td>`;
+      tr.querySelectorAll("input").forEach((inp) => {
+        inp.value = p[inp.dataset.k];
+        inp.readOnly = Boolean(SHEET_CSV_URL);
+        inp.addEventListener("change", () => edit(p, inp.dataset.k, inp.value));
+      });
+      $("sheet").append(tr);
+    });
+  }
+
+  function edit(p, key, value) {
+    const before = p[key];
+    const after = key === "nom" ? value.trim() || before : Math.max(0, Math.round(Number(String(value).replace(/\s/g, "")) || 0));
+    if (after === before) return; // rien n'a changé : on ne redessine pas (sinon un clic en cours serait perdu)
+    p[key] = after;
+    changed = p.nom;
+    priceChanged = key === "prix" ? p.nom : null;
+    if (key === "stock" && before <= 0 && p.stock > 0) retour(p);
+    renderGrid();
+    flashSync();
+  }
+
+  // Stock revenu : la liste des clientes à prévenir, message déjà écrit.
+  function retour(p) {
+    const list = alertes[p.nom] || [];
+    if (!list.length) return;
+    const box = document.createElement("div");
+    box.className = "notify";
+    box.innerHTML = `<b>🔔 ${p.nom} est de retour : ${list.length} cliente${list.length > 1 ? "s" : ""} à prévenir</b>`;
+    list.forEach((c) => {
+      const a = document.createElement("a");
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.href = `https://wa.me/${c.tel.replace(/\D/g, "").replace(/^0/, "213")}?text=${encodeURIComponent(`Bonjour ${c.prenom} ! Bonne nouvelle : « ${p.nom} » est de retour chez Boutique Atlas (${fmt(p.prix)}). On vous en met un de côté ? 🛍️`)}`;
+      a.innerHTML = "<span></span><span>Prévenir ➜</span>";
+      a.firstChild.textContent = `${c.prenom} · ${c.tel}`;
+      box.append(a);
+    });
+    $("notify").prepend(box);
+    alertes[p.nom] = [];
+  }
+
+  function flashSync() {
+    $("synced").textContent = "Mise à jour reçue à l'instant";
+    clearTimeout(flashSync.t);
+    flashSync.t = setTimeout(() => ($("synced").textContent = "Synchronisé avec Google Sheets"), 2500);
+  }
+
+  let current = null;
+  function openAlert(p) {
+    current = p;
+    $("alert-sub").textContent = `On vous écrit sur WhatsApp dès que « ${p.nom} » revient.`;
+    $("alert").hidden = false;
+    $("a-prenom").focus();
+  }
+  $("a-cancel").onclick = () => ($("alert").hidden = true);
+  $("alert-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const c = { prenom: $("a-prenom").value.trim(), tel: $("a-tel").value.trim() };
+    (alertes[current.nom] = alertes[current.nom] || []).push(c);
+    if (SCRIPT_URL) fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: new URLSearchParams({ produit: current.nom, prenom: c.prenom, whatsapp: c.tel, consentement: "oui" }) }).catch(() => {});
+    e.target.reset();
+    $("alert").hidden = true;
+  });
+
+  // Lecture d'une feuille publiée en CSV : Produit, Prix, Stock, Image (facultative).
+  function parseCSV(text) {
+    const rows = [];
+    let row = [], cell = "", quoted = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (quoted) {
+        if (ch === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+        else if (ch === '"') quoted = false;
+        else cell += ch;
+      } else if (ch === '"') quoted = true;
+      else if (ch === ",") { row.push(cell); cell = ""; }
+      else if (ch === "\n" || ch === "\r") { if (ch === "\r" && text[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+      else cell += ch;
+    }
+    if (cell || row.length) { row.push(cell); rows.push(row); }
+    return rows;
+  }
+  async function loadSheet() {
+    try {
+      const res = await fetch(SHEET_CSV_URL, { cache: "no-store" });
+      const [, ...rows] = parseCSV(await res.text());
+      const next = rows.filter((r) => r[0]).map((r) => ({ nom: r[0].trim(), prix: Number(String(r[1]).replace(/\D/g, "")) || 0, stock: Number(String(r[2]).replace(/\D/g, "")) || 0, image: (r[3] || "").trim() }));
+      next.forEach((p) => { const old = produits.find((x) => x.nom === p.nom); if (old && old.stock <= 0 && p.stock > 0) retour(p); });
+      produits = next;
+      renderGrid();
+      renderSheet();
+      flashSync();
+    } catch { /* on garde l'affichage précédent */ }
+  }
+
+  renderGrid();
+  renderSheet();
+  if (SHEET_CSV_URL) { loadSheet(); setInterval(loadSheet, 60000); }
+</script>
+</body>
+</html>

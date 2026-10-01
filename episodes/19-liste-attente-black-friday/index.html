@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boutique Atlas — Black Friday</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --soft: #FBEDE6; --ok: #1E7A42; --night: #17110E;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 0 16px 48px; }
+
+  .hero { background: var(--night); color: #fff; border-radius: 0 0 28px 28px; padding: 26px 18px 22px; margin: 0 -16px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ""; position: absolute; inset: -40% -20% auto; height: 260px; background: radial-gradient(circle, #CF765255, transparent 60%); }
+  .hero > * { position: relative; }
+  .brandname { font: 600 14px Fraunces, serif; letter-spacing: 3px; color: #E9DCD3; }
+  .hero h1 { font: 700 44px/1 Inter, sans-serif; letter-spacing: -1.5px; margin-top: 10px; }
+  .hero h1 span { color: var(--brand); }
+  .hero p { color: #E9DCD3; font-size: 14px; margin-top: 8px; line-height: 1.5; }
+  .count { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 18px; }
+  .count div { background: #ffffff12; border: 1px solid #ffffff22; border-radius: 14px; padding: 10px 0; }
+  .count b { display: block; font-size: 28px; font-variant-numeric: tabular-nums; }
+  .count small { font-size: 11px; color: #E9DCD3; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 18px; margin-top: 18px; box-shadow: 0 24px 50px -32px #6b3a2470; }
+  .card h2 { font: 600 21px Fraunces, serif; }
+  .card .sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  label.f { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
+  input[type=text], input[type=tel] { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line); font: inherit; font-size: 15px; }
+  input:focus { outline: none; border-color: var(--brand); }
+  .consent { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+  .consent input { margin-top: 2px; width: 18px; height: 18px; accent-color: var(--brand); flex-shrink: 0; }
+  .btn { width: 100%; margin-top: 16px; padding: 16px; border: 0; border-radius: 999px; background: var(--brand); color: #fff; font: 700 16px Inter, sans-serif; cursor: pointer; }
+  .btn:hover { background: var(--brand-dark); }
+  .err { color: #B3261E; font-size: 13px; margin-top: 8px; min-height: 18px; }
+  .people { display: flex; align-items: center; gap: 10px; margin-top: 14px; font-size: 13px; color: var(--muted); }
+  .people .dots { display: flex; }
+  .people .dots i { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff; margin-left: -8px; display: grid; place-items: center; font: 600 11px Inter, sans-serif; color: #fff; font-style: normal; }
+  .people .dots i:first-child { margin-left: 0; }
+  .people b { color: var(--ink); }
+  .done { text-align: center; padding: 10px 0; }
+  .done .big { font-size: 46px; }
+  .done h2 { margin-top: 6px; }
+  .done p { color: var(--muted); font-size: 14px; margin-top: 6px; line-height: 1.5; }
+  .done .tip { margin-top: 12px; background: var(--soft); border-radius: 12px; padding: 10px 12px; font-size: 13px; color: var(--brand-dark); }
+  [hidden] { display: none !important; }
+
+  .owner { margin-top: 28px; background: var(--ink); color: #fff; border-radius: 22px; padding: 18px; }
+  .owner small.k { color: var(--brand); font-weight: 600; letter-spacing: 1px; font-size: 11px; }
+  .owner h3 { font: 600 20px Fraunces, serif; margin-top: 2px; }
+  .sheet { margin-top: 12px; background: #fff; color: var(--ink); border-radius: 12px; overflow: hidden; font-size: 12px; }
+  .sheet table { width: 100%; border-collapse: collapse; }
+  .sheet th, .sheet td { border-bottom: 1px solid #E3E3E3; padding: 7px 8px; text-align: left; white-space: nowrap; }
+  .sheet th { background: #F8F9FA; color: #5F6368; font-weight: 500; }
+  .sheet tr.new td { animation: flash 2.2s ease-out; }
+  @keyframes flash { 0% { background: #FCE8B2; } }
+  .dday { margin-top: 14px; display: grid; gap: 10px; }
+  .dday button { padding: 13px; border-radius: 999px; border: 0; background: var(--brand); color: #fff; font: 600 14px Inter, sans-serif; cursor: pointer; }
+  .wa { background: #E7F8EC; color: var(--ink); border-radius: 14px 14px 14px 4px; padding: 10px 12px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; }
+  .send-list { display: grid; gap: 6px; }
+  .send-list a { display: flex; justify-content: space-between; background: #ffffff14; color: #fff; text-decoration: none; border-radius: 10px; padding: 9px 12px; font-size: 13px; }
+  .send-list a span:last-child { color: #8ee0a8; font-weight: 600; }
+
+  .steps { margin-top: 40px; background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand-dark); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="brandname">BOUTIQUE ATLAS</div>
+    <h1>BLACK<br><span>FRIDAY</span></h1>
+    <p>Vendredi 27 novembre · les inscrites sont prévenues<br>2 heures avant tout le monde.</p>
+    <div class="count" aria-label="Compte à rebours">
+      <div><b id="d">00</b><small>jours</small></div>
+      <div><b id="h">00</b><small>heures</small></div>
+      <div><b id="m">00</b><small>min</small></div>
+      <div><b id="s">00</b><small>sec</small></div>
+    </div>
+  </section>
+
+  <div class="card">
+    <form id="form" novalidate>
+      <h2>Être prévenue en premier</h2>
+      <p class="sub">Un seul message WhatsApp, le jour J. Pas de spam.</p>
+      <label class="f" for="prenom">Prénom</label>
+      <input type="text" id="prenom" autocomplete="given-name" placeholder="Ex. Amina">
+      <label class="f" for="tel">Numéro WhatsApp</label>
+      <input type="tel" id="tel" autocomplete="tel" placeholder="Ex. 0550 00 00 00">
+      <label class="consent"><input type="checkbox" id="ok">J'accepte de recevoir un message WhatsApp de Boutique Atlas pour le Black Friday. Je peux me désinscrire à tout moment en répondant STOP.</label>
+      <p class="err" id="err" role="alert"></p>
+      <button class="btn" type="submit">M'inscrire sur la liste</button>
+      <div class="people"><span class="dots" id="dots"></span><span><b id="n">0</b> personnes déjà inscrites</span></div>
+    </form>
+    <div class="done" id="done" hidden>
+      <div class="big">🖤</div>
+      <h2>Vous êtes sur la liste !</h2>
+      <p id="done-txt"></p>
+      <p class="tip">Astuce : enregistrez notre numéro dans vos contacts pour être sûre de recevoir le message.</p>
+    </div>
+  </div>
+
+  <section class="owner">
+    <small class="k">CÔTÉ BOUTIQUE</small>
+    <h3>La liste se remplit toute seule</h3>
+    <div class="sheet"><table><thead><tr><th>Inscrite le</th><th>Prénom</th><th>WhatsApp</th><th>Accord</th></tr></thead><tbody id="rows"></tbody></table></div>
+    <div class="dday">
+      <button type="button" id="jourj">📅 Simuler le jour J</button>
+      <div id="dday-out" hidden>
+        <div class="wa" id="wa-msg"></div>
+        <p style="font-size:12px;color:#E9DCD3;margin:10px 0 6px">Un geste par inscrite, le message est déjà écrit :</p>
+        <div class="send-list" id="send-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Une page avec le compte à rebours et un formulaire : prénom, WhatsApp, accord.</li>
+      <li>Chaque inscription arrive dans Google Sheets, avec la date et l'accord.</li>
+      <li>Partagez le lien en story et en bio dès maintenant, pas le jour J.</li>
+      <li>Le jour J, un geste par inscrite : elles achètent avant tout le monde.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  // URL de l'Application Web (attente.gs). Vide = démo : l'inscription reste dans cette page.
+  const SCRIPT_URL = "";
+  const BLACK_FRIDAY = new Date(2026, 10, 27, 9, 0, 0); // vendredi 27 novembre 2026, 9h
+  const BASE = 127;                                      // inscrites d'exemple
+  const $ = (id) => document.getElementById(id);
+  const pad = (n) => String(n).padStart(2, "0");
+  const COLORS = ["#CF7652", "#6B8F71", "#5B6C8F", "#A9583A", "#8F6B8B"];
+
+  const list = [
+    { quand: "15/11 21:04", prenom: "Yasmine", tel: "0551 12 34 56" },
+    { quand: "15/11 22:17", prenom: "Rym", tel: "0661 98 76 54" },
+    { quand: "16/11 08:42", prenom: "Kenza", tel: "0770 11 22 33" },
+  ];
+
+  function tick() {
+    let ms = Math.max(0, BLACK_FRIDAY - new Date());
+    const d = Math.floor(ms / 864e5); ms -= d * 864e5;
+    const h = Math.floor(ms / 36e5); ms -= h * 36e5;
+    const m = Math.floor(ms / 6e4); ms -= m * 6e4;
+    $("d").textContent = pad(d); $("h").textContent = pad(h); $("m").textContent = pad(m); $("s").textContent = pad(Math.floor(ms / 1000));
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  function render(highlight) {
+    $("n").textContent = BASE + list.length;
+    $("dots").innerHTML = "";
+    list.slice(-4).forEach((p, i) => {
+      const dot = document.createElement("i");
+      dot.style.background = COLORS[i % COLORS.length];
+      dot.textContent = p.prenom[0];
+      $("dots").append(dot);
+    });
+    $("rows").innerHTML = "";
+    list.slice(-5).reverse().forEach((p, i) => {
+      const tr = document.createElement("tr");
+      if (highlight && i === 0) tr.className = "new";
+      [p.quand, p.prenom, p.tel, "✓ oui"].forEach((v) => { const td = document.createElement("td"); td.textContent = v; tr.append(td); });
+      $("rows").append(tr);
+    });
+  }
+
+  $("form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const prenom = $("prenom").value.trim(), tel = $("tel").value.trim();
+    if (!prenom || tel.replace(/\D/g, "").length < 9) { $("err").textContent = "Indiquez votre prénom et un numéro WhatsApp valide."; return; }
+    if (!$("ok").checked) { $("err").textContent = "Cochez la case pour accepter de recevoir le message."; return; }
+    $("err").textContent = "";
+    const now = new Date();
+    list.push({ quand: `${pad(now.getDate())}/${pad(now.getMonth() + 1)} ${pad(now.getHours())}:${pad(now.getMinutes())}`, prenom, tel });
+    if (SCRIPT_URL) fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: new URLSearchParams({ prenom, whatsapp: tel, consentement: "oui", source: new URLSearchParams(location.search).get("source") || "page" }) }).catch(() => {});
+    $("form").hidden = true;
+    $("done").hidden = false;
+    $("done-txt").textContent = `Merci ${prenom} ! Le vendredi 27 novembre, vous recevrez l'accès aux offres 2 heures avant tout le monde.`;
+    render(true);
+  });
+
+  const messageJourJ = (prenom) => `Bonjour ${prenom} 🖤 C'est le Black Friday chez Boutique Atlas !\nComme promis, vous avez 2 heures d'avance : -30 % sur toute la boutique jusqu'à 11h, rien que pour les inscrites.\nRépondez à ce message pour réserver vos pièces.\n(Répondez STOP pour ne plus recevoir de messages.)`;
+
+  $("jourj").onclick = () => {
+    $("dday-out").hidden = false;
+    $("wa-msg").textContent = messageJourJ(list[list.length - 1].prenom);
+    $("send-list").innerHTML = "";
+    list.slice().reverse().forEach((p) => {
+      const a = document.createElement("a");
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.href = `https://wa.me/${p.tel.replace(/\D/g, "").replace(/^0/, "213")}?text=${encodeURIComponent(messageJourJ(p.prenom))}`;
+      a.innerHTML = "<span></span><span>Envoyer ➜</span>";
+      a.firstChild.textContent = `${p.prenom} · ${p.tel}`;
+      $("send-list").append(a);
+    });
+  };
+
+  if (SCRIPT_URL) fetch(`${SCRIPT_URL}?action=compte`).then((r) => r.json()).then((d) => { if (d.inscrites) $("n").textContent = d.inscrites; }).catch(() => {});
+  render();
+</script>
+</body>
+</html>

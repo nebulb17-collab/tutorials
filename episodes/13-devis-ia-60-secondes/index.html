@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studio Nour — Proposition</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CF7652; --brand-dark: #A9583A; --ink: #2A211C; --muted: #7A6A60;
+    --bg: #FBF6F1; --card: #FFFFFF; --line: #EFE4DA; --soft: #FBEDE6; --ok: #1E7A42;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 0 16px 48px; }
+  header { padding: 28px 0 14px; display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+  header small { color: var(--brand-dark); font-weight: 600; letter-spacing: 1px; font-size: 12px; }
+  h1 { font: 600 26px Fraunces, serif; margin-top: 4px; }
+  .timer { background: var(--ink); color: #fff; border-radius: 12px; padding: 8px 10px; text-align: center; font-size: 11px; flex-shrink: 0; }
+  .timer b { display: block; font: 600 20px Inter, sans-serif; font-variant-numeric: tabular-nums; }
+  .timer.done { background: var(--ok); }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 18px; }
+  .card h2 { font-size: 13px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
+  label, .label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
+  input, select, textarea { width: 100%; padding: 11px 13px; border-radius: 12px; border: 1.5px solid var(--line); background: #fff; font: inherit; font-size: 15px; color: var(--ink); }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--brand); }
+  textarea { min-height: 70px; resize: vertical; }
+  .row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+  .formules { display: grid; gap: 8px; }
+  .formules label.formule, .opts label.opt { margin: 0; position: relative; }
+  .formules input, .opts input { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
+  .formule > span { display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1.5px solid var(--line); border-radius: 14px; padding: 12px 14px; cursor: pointer; font-size: 14px; }
+  .formule small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .formule > span > b { white-space: nowrap; }
+  .formules input:checked + span { border-color: var(--brand); background: var(--soft); }
+  .formules input:checked + span b:first-child { color: var(--brand-dark); }
+  .opts { display: grid; gap: 6px; }
+  .opt > span { display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; cursor: pointer; font-size: 14px; }
+  .opt > span > span { flex: 1; }
+  .opt > span > b { white-space: nowrap; }
+  .opt > span::before { content: "＋"; color: var(--muted); }
+  .opts input:checked + span { border-color: var(--brand); background: var(--soft); }
+  .opts input:checked + span::before { content: "✓"; color: var(--brand-dark); }
+  .formules input:focus-visible + span, .opts input:focus-visible + span { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .btn { display: inline-flex; justify-content: center; align-items: center; gap: 6px; width: 100%; margin-top: 16px; padding: 15px; border: 0; border-radius: 999px; background: var(--brand); color: #fff; font: 600 15px Inter, sans-serif; cursor: pointer; text-decoration: none; }
+  .btn:hover { background: var(--brand-dark); }
+  .btn:disabled { opacity: .6; cursor: default; }
+  .btn.ghost { background: var(--card); color: var(--ink); border: 1.5px solid var(--line); }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .actions .btn { margin-top: 10px; }
+
+  /* La proposition */
+  #doc { margin-top: 22px; background: #fff; border-radius: 6px; box-shadow: 0 30px 60px -30px #6b3a2470, 0 0 0 1px var(--line); padding: 26px 22px; display: none; }
+  #doc.show { display: block; animation: rise .5s ease-out; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+  .doc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; border-bottom: 2px solid var(--brand); padding-bottom: 14px; }
+  .mark { font: 600 22px Fraunces, serif; }
+  .mark span { color: var(--brand); }
+  .ref { text-align: right; font-size: 11px; color: var(--muted); line-height: 1.6; }
+  #doc h3 { font: 600 22px Fraunces, serif; margin: 18px 0 6px; }
+  #doc h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--brand-dark); margin: 18px 0 6px; }
+  #doc p, #doc li { font-size: 14px; line-height: 1.6; }
+  #doc ul { padding-left: 18px; }
+  [data-ai] { white-space: pre-wrap; border-radius: 6px; transition: background .3s; }
+  [data-ai].writing::after { content: "▍"; color: var(--brand); animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  #doc.editing [data-ai] { background: #FFF8E6; outline: 1px dashed #E2A23B; }
+  table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 13px; font-variant-numeric: tabular-nums; }
+  td { padding: 8px 0; border-bottom: 1px solid var(--line); }
+  td:last-child { text-align: right; white-space: nowrap; }
+  tr.total td { border-bottom: 0; font-weight: 700; font-size: 16px; padding-top: 12px; }
+  tr.acompte td { color: var(--muted); border-bottom: 0; padding-top: 0; }
+  .sign { margin-top: 18px; font-size: 13px; color: var(--muted); }
+
+  .steps { margin-top: 40px; background: var(--ink); color: #fff; border-radius: 20px; padding: 22px; }
+  .steps h3 { font: 600 18px Fraunces, serif; color: var(--brand); margin-bottom: 12px; }
+  .steps ol { padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; }
+
+  @media print {
+    @page { margin: 14mm; }
+    body { background: #fff; }
+    .wrap > *:not(#doc) { display: none !important; }
+    .wrap { max-width: none; padding: 0; }
+    #doc { display: block; box-shadow: none; padding: 0; margin: 0; }
+    #doc.editing [data-ai] { background: none; outline: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <small>STUDIO NOUR · PHOTOGRAPHE</small>
+      <h1>Fiche après l'appel</h1>
+    </div>
+    <div class="timer" id="timer" aria-live="off"><b id="clock">0:00</b>chrono</div>
+  </header>
+
+  <form class="card" id="form">
+    <h2>Le client</h2>
+    <div class="row">
+      <div><label for="client">Prénoms</label><input id="client" value="Sarah & Yanis" required></div>
+      <div><label for="tel">WhatsApp</label><input id="tel" type="tel" value="0550 12 34 56"></div>
+    </div>
+    <div class="row">
+      <div><label for="evenement">Événement</label>
+        <select id="evenement"><option>Mariage</option><option>Fiançailles</option><option>Henné</option><option>Anniversaire</option><option>Événement d'entreprise</option></select></div>
+      <div><label for="date">Date</label><input id="date" type="date" value="2027-06-12" required></div>
+    </div>
+    <div class="row">
+      <div><label for="lieu">Lieu</label><input id="lieu" value="Salle Les Oliviers, Tipaza"></div>
+      <div><label for="invites">Invités</label><input id="invites" type="number" min="1" value="250"></div>
+    </div>
+
+    <span class="label">Formule</span>
+    <div class="formules" id="formules"></div>
+
+    <span class="label">Options</span>
+    <div class="opts" id="opts"></div>
+
+    <label for="notes">Notes de l'appel</label>
+    <textarea id="notes">Ils veulent surtout des photos naturelles, pas trop posées. La maman de Sarah arrive de Lyon la veille.</textarea>
+
+    <button class="btn" type="submit" id="go">✨ Générer la proposition</button>
+  </form>
+
+  <article id="doc" aria-live="polite">
+    <div class="doc-head">
+      <div class="mark">Studio <span>Nour</span><div style="font:400 11px Inter,sans-serif;color:var(--muted);margin-top:4px">Photographe · Alger</div></div>
+      <div class="ref"><div id="ref"></div><div id="emis"></div><div id="valid"></div></div>
+    </div>
+    <h3 id="titre"></h3>
+    <p data-ai="intro"></p>
+    <h4>Votre journée</h4>
+    <p data-ai="prestation"></p>
+    <h4>Le détail</h4>
+    <table><tbody id="lignes"></tbody></table>
+    <h4>Pourquoi Studio Nour</h4>
+    <ul id="points"></ul>
+    <h4>Prochaine étape</h4>
+    <p data-ai="prochaines_etapes"></p>
+    <p class="sign">Nour · Studio Nour · +213 000 000 000</p>
+  </article>
+
+  <div class="actions" id="actions" hidden>
+    <button class="btn ghost" id="edit" type="button">✏️ Modifier le texte</button>
+    <button class="btn ghost" id="pdf" type="button">📄 PDF</button>
+  </div>
+  <a class="btn" id="send" target="_blank" rel="noopener" hidden>Envoyer au client sur WhatsApp</a>
+
+  <section class="steps" aria-label="Les 4 étapes">
+    <h3>Automatise ça · les 4 étapes</h3>
+    <ol>
+      <li>Après l'appel, remplissez la fiche : 6 champs, une minute.</li>
+      <li>Les prix se calculent tout seuls à partir de vos formules.</li>
+      <li>L'IA écrit le texte personnalisé : vous relisez, vous corrigez.</li>
+      <li>PDF ou WhatsApp : la proposition part pendant que le client est encore emballé.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  // Adresse du serveur IA (outils/ia-worker). Vide = textes d'exemple, sans IA.
+  const AI_ENDPOINT = "";
+  const FORMULES = [
+    { nom: "Essentielle", detail: "4 h de reportage, 300 photos retouchées", prix: 60000,
+      phrase: "je couvre les quatre heures les plus importantes de la journée" },
+    { nom: "Signature", detail: "8 h, de la préparation à la première danse, 600 photos", prix: 110000,
+      phrase: "je vous suis pendant huit heures, des préparatifs à la première danse" },
+    { nom: "Prestige", detail: "Journée complète + 2e photographe, 900 photos", prix: 160000,
+      phrase: "nous serons deux photographes toute la journée, pour ne manquer aucun regard" },
+  ];
+  const OPTIONS = [
+    { nom: "Album photo 30×30, 40 pages", prix: 25000 },
+    { nom: "Séance couple avant le jour J", prix: 15000 },
+    { nom: "Film souvenir de 3 minutes", prix: 35000 },
+    { nom: "Livraison express en 7 jours", prix: 10000 },
+  ];
+  const ACOMPTE = 0.3;
+  const VALIDITE_JOURS = 15;
+
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => n.toLocaleString("fr-FR").replace(/ /g, " ") + " DA";
+  const longDate = (iso) => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }); };
+
+  FORMULES.forEach((f, i) => {
+    const l = document.createElement("label");
+    l.className = "formule";
+    l.innerHTML = `<input type="radio" name="formule" value="${i}" ${i === 1 ? "checked" : ""}><span><span><b></b><small></small></span><b>${fmt(f.prix)}</b></span>`;
+    l.querySelector("span b").textContent = f.nom;
+    l.querySelector("small").textContent = f.detail;
+    $("formules").append(l);
+  });
+  OPTIONS.forEach((o, i) => {
+    const l = document.createElement("label");
+    l.className = "opt";
+    l.innerHTML = `<input type="checkbox" value="${i}" ${i === 0 ? "checked" : ""}><span><span></span><b>+ ${fmt(o.prix)}</b></span>`;
+    l.querySelector("span span").textContent = o.nom;
+    $("opts").append(l);
+  });
+
+  // Chrono : démarre au premier geste sur la fiche, s'arrête quand la proposition est prête.
+  let start = null, timer = null;
+  function startClock() {
+    if (start) return;
+    start = Date.now();
+    timer = setInterval(() => {
+      const s = Math.floor((Date.now() - start) / 1000);
+      $("clock").textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+    }, 250);
+  }
+  $("form").addEventListener("input", startClock);
+  $("form").addEventListener("click", startClock);
+
+  function fiche() {
+    const f = FORMULES[Number(document.querySelector("input[name=formule]:checked").value)];
+    const opts = [...document.querySelectorAll("#opts input:checked")].map((i) => OPTIONS[Number(i.value)]);
+    return {
+      client: $("client").value.trim(), tel: $("tel").value.trim(), evenement: $("evenement").value,
+      date: $("date").value, lieu: $("lieu").value.trim(), invites: Number($("invites").value) || 0,
+      formule: f, options: opts, notes: $("notes").value.trim(),
+    };
+  }
+
+  // Textes d'exemple quand il n'y a pas de serveur IA (avec le serveur, Claude les écrit).
+  function textesDemo(d) {
+    const evt = d.evenement.toLowerCase();
+    const natur = /naturel|spontan|pas trop pos/i.test(d.notes);
+    const famille = d.notes.match(/(la |le |les )?(maman|mère|père|papa|grand-mère|famille)[^.,]*/i);
+    const proche = famille && famille[0].replace(/ (arrive|vient|sera|est)\b.*$/i, "");
+    return {
+      intro: `Bonjour ${d.client},\n\nMerci pour notre échange ! Votre ${evt} du ${longDate(d.date)}${d.lieu ? ` à ${d.lieu}` : ""} s'annonce magnifique, et ce serait une joie de le raconter en images.`,
+      prestation: `Avec la formule ${d.formule.nom}, ${d.formule.phrase}. ${natur ? "Comme vous le souhaitez, je privilégierai les images spontanées, prises sur le vif, sans poses forcées." : "Des moments forts aux petits détails, rien ne sera oublié."}${proche ? ` Je veillerai aussi à de beaux portraits avec ${proche.charAt(0).toLowerCase() + proche.slice(1)}.` : ""}${d.invites > 150 ? ` Avec ${d.invites} invités, je prévois un repérage du lieu en amont.` : ""}`,
+      points_forts: [
+        "Une lumière naturelle et des retouches douces, qui vieillissent bien",
+        "Une galerie privée en ligne à partager avec toute la famille",
+        "Un seul interlocuteur, de la préparation à la livraison",
+      ],
+      prochaines_etapes: `Pour bloquer votre date, il suffit de me répondre « je valide » : je vous envoie la facture d'acompte dans la foulée. Votre date reste réservée pour vous pendant ${VALIDITE_JOURS} jours.`,
+    };
+  }
+
+  async function textesIA(d) {
+    const res = await fetch(AI_ENDPOINT, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode: "devis", commerce: "studio-nour", devis: {
+        client: d.client, evenement: d.evenement, date: longDate(d.date), lieu: d.lieu, invites: d.invites,
+        formule: `${d.formule.nom} (${d.formule.detail})`, options: d.options.map((o) => o.nom), notes: d.notes } }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.resultat) throw new Error(data.erreur || "Erreur");
+    return data.resultat;
+  }
+
+  function typeInto(el, text) {
+    return new Promise((resolve) => {
+      let i = 0;
+      el.classList.add("writing");
+      const step = () => {
+        i = Math.min(text.length, i + 4);
+        el.textContent = text.slice(0, i);
+        if (i < text.length) setTimeout(step, 10);
+        else { el.classList.remove("writing"); resolve(); }
+      };
+      step();
+    });
+  }
+
+  let numero = 117;
+  try { numero = Number(localStorage.getItem("studio-nour-num")) || numero; } catch {}
+
+  $("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    startClock();
+    const d = fiche();
+    $("go").disabled = true;
+    $("go").textContent = "L'IA écrit…";
+
+    numero++;
+    try { localStorage.setItem("studio-nour-num", numero); } catch {}
+    const ref = `PR-2026-${String(numero).padStart(4, "0")}`;
+    const today = new Date();
+    const valid = new Date(today.getTime() + VALIDITE_JOURS * 864e5);
+    $("ref").textContent = ref;
+    $("emis").textContent = `Émise le ${today.toLocaleDateString("fr-FR")}`;
+    $("valid").textContent = `Valable jusqu'au ${valid.toLocaleDateString("fr-FR")}`;
+    $("titre").textContent = `Proposition pour ${d.client}`;
+
+    // Les prix viennent de vos formules, jamais de l'IA.
+    const total = d.formule.prix + d.options.reduce((s, o) => s + o.prix, 0);
+    $("lignes").innerHTML = "";
+    const line = (label, value, cls) => {
+      const tr = document.createElement("tr");
+      if (cls) tr.className = cls;
+      tr.innerHTML = "<td></td><td></td>";
+      tr.children[0].textContent = label;
+      tr.children[1].textContent = value;
+      $("lignes").append(tr);
+    };
+    line(`Formule ${d.formule.nom} — ${d.formule.detail}`, fmt(d.formule.prix));
+    d.options.forEach((o) => line(o.nom, fmt(o.prix)));
+    line("Total", fmt(total), "total");
+    line(`Acompte pour réserver la date (${ACOMPTE * 100} %)`, fmt(Math.round(total * ACOMPTE)), "acompte");
+
+    document.querySelectorAll("[data-ai]").forEach((el) => (el.textContent = ""));
+    $("points").innerHTML = "";
+    $("doc").classList.add("show");
+    $("doc").scrollIntoView({ behavior: "smooth", block: "start" });
+
+    let t;
+    try { t = AI_ENDPOINT ? await textesIA(d) : textesDemo(d); } catch { t = textesDemo(d); }
+    for (const key of ["intro", "prestation"]) await typeInto(document.querySelector(`[data-ai=${key}]`), t[key]);
+    for (const p of t.points_forts.slice(0, 3)) {
+      const li = document.createElement("li");
+      li.dataset.ai = "point";
+      $("points").append(li);
+      await typeInto(li, p);
+    }
+    await typeInto(document.querySelector("[data-ai=prochaines_etapes]"), t.prochaines_etapes);
+
+    clearInterval(timer);
+    $("timer").classList.add("done");
+    $("go").disabled = false;
+    $("go").textContent = "✨ Régénérer";
+    $("actions").hidden = false;
+    $("send").hidden = false;
+    const num = d.tel.replace(/\D/g, "").replace(/^0/, "213");
+    $("send").href = `https://wa.me/${num}?text=${encodeURIComponent(
+      `Bonjour ${d.client} ! Comme promis, voici votre proposition Studio Nour pour votre ${d.evenement.toLowerCase()} du ${longDate(d.date)} :\n• Formule ${d.formule.nom}${d.options.length ? ` + ${d.options.length} option${d.options.length > 1 ? "s" : ""}` : ""}\n• Total : ${fmt(total)} (acompte ${fmt(Math.round(total * ACOMPTE))})\nJe vous envoie le PDF juste après. Votre date est bloquée jusqu'au ${valid.toLocaleDateString("fr-FR")} 📸`)}`;
+  });
+
+  $("edit").onclick = () => {
+    const editing = $("doc").classList.toggle("editing");
+    document.querySelectorAll("#doc [data-ai]").forEach((el) => (el.contentEditable = editing));
+    $("edit").textContent = editing ? "✓ Terminer" : "✏️ Modifier le texte";
+  };
+  $("pdf").onclick = () => window.print();
+</script>
+</body>
+</html>

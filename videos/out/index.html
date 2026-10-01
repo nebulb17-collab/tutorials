@@ -1,0 +1,129 @@
+<meta charset="utf-8">
+<title>Vidéos Automatise ça</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Layout: an editor's media bin. A slim header, one filter row, then a wrapping grid of 9:16 clips with timecode-style metadata. */
+  :root {
+    color-scheme: dark;
+    --bg: #15110E; --panel: #1F1915; --line: #3A2F28; --fg: #F2E9E1; --muted: #A99A8E; --accent: #E58C68; --on-accent: #1B120D; --chip: #2A221D;
+    --display: "Fraunces", Georgia, serif; --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif; --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+    --bg: #F6F1EC; --panel: #FFFFFF; --line: #E4D8CD; --fg: #231B16; --muted: #6F6157; --accent: #B05A39; --on-accent: #FFFFFF; --chip: #F0E6DD; color-scheme: light; } }
+  :root[data-theme="light"] { --bg: #F6F1EC; --panel: #FFFFFF; --line: #E4D8CD; --fg: #231B16; --muted: #6F6157; --accent: #B05A39; --on-accent: #FFFFFF; --chip: #F0E6DD; color-scheme: light; }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 var(--body); padding: 28px 20px 56px; }
+  .wrap { max-width: 1240px; margin: 0 auto; display: grid; gap: 22px; }
+  header { display: grid; gap: 8px; }
+  .eyebrow, .meta, .file, .badge, .time, .date { font-family: var(--mono); letter-spacing: .04em; }
+  .eyebrow { font-size: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: .14em; }
+  h1 { font: 600 clamp(30px, 5vw, 46px)/1.05 var(--display); margin: 0; text-wrap: balance; }
+  .lede { margin: 0; color: var(--muted); max-width: 68ch; }
+  .meta { font-size: 12px; color: var(--muted); }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+  .filters button { font: 500 14px var(--body); color: var(--fg); background: var(--chip); border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; cursor: pointer; }
+  .filters button span { color: var(--muted); font-family: var(--mono); font-size: 12px; margin-left: 6px; }
+  .filters button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .filters button[aria-pressed="true"] span { color: var(--on-accent); }
+  button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr)); gap: 16px; }
+  @media (min-width: 700px) { .grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 18px; } }
+  .clip { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; min-width: 0; }
+  .screen { position: relative; aspect-ratio: 9 / 16; max-width: 100%; background: #000; }
+  .screen video { width: 100%; height: 100%; display: block; object-fit: cover; }
+  .badge, .time { position: absolute; top: 8px; font-size: 11px; background: #000000b3; color: #fff; border-radius: 6px; padding: 3px 7px; pointer-events: none; }
+  .badge { left: 8px; } .time { right: 8px; font-variant-numeric: tabular-nums; }
+  .info { padding: 12px 12px 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-width: 0; }
+  .info > .row:first-child { flex-wrap: wrap; row-gap: 6px; }
+  .date { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .kw { font: 600 11px var(--mono); letter-spacing: .06em; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
+  h2 { font: 600 16px/1.25 var(--body); margin: 0; text-wrap: balance; }
+  .hook { margin: 0; font-size: 13px; color: var(--muted); }
+  .toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; width: max-content; }
+  .toggle button { font: 500 12px var(--mono); background: transparent; color: var(--muted); border: 0; padding: 5px 10px; cursor: pointer; }
+  .toggle button[aria-pressed="true"] { background: var(--chip); color: var(--fg); }
+  .file { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .open { font: 600 12px var(--body); color: var(--accent); text-decoration: none; white-space: nowrap; }
+  .open:hover { text-decoration: underline; }
+  .note { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; max-width: 80ch; }
+  .empty { color: var(--muted); }
+</style>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Automatise ça · Oct – Nov 2026</div>
+    <h1>Vidéos Automatise ça</h1>
+    <p class="lede">One motion video per episode, hook B versions for season 2, and the « Quelle semaine 🤯 » weekly recaps. Hover or tap a clip to play it; the file name is what you upload.</p>
+    <div class="meta">46 files · 1080 × 1920 · 30 fps · H.264 · no sound (add a trending audio in the app)</div>
+  </header>
+  <div class="filters" role="group" aria-label="Filter videos" id="filters"></div>
+  <div class="grid" id="grid"></div>
+  <p class="note">To save a video, use « Open ↗ », then your browser's save option (or right-click → Save video as). Covers for each Reel are in <span class="file">couvertures/</span>. Re-render or edit any video with <span class="file">videos/moteur/render.mjs</span> in the tutorials repo.</p>
+</div>
+<script>
+  const ITEMS = [{"groupe":"s1","badge":"EP 01","titre":"Bouton « Commander sur WhatsApp »","date":"Mon 5 Oct","mot":"MENU","variantes":[{"label":"Hook A","texte":"« Vos clients vous écrivent “c'est combien ?” 50 fois par jour ? »","src":"ep01-menu-whatsapp.mp4","poster":"couvertures/ep01-menu-whatsapp.jpg","duree":25.5}]},{"groupe":"s1","badge":"EP 02","titre":"Formulaire de commande boutique","date":"Wed 7 Oct","mot":"📌 Save","variantes":[{"label":"Hook A","texte":"« Fini les 10 messages pour une seule commande. »","src":"ep02-commande-boutique.mp4","poster":"couvertures/ep02-commande-boutique.jpg","duree":24.7}]},{"groupe":"s1","badge":"EP 03","titre":"QR code WhatsApp","date":"Fri 9 Oct","mot":"QR","variantes":[{"label":"Hook A","texte":"« Ce QR code m'a pris 2 minutes. »","src":"ep03-qr-code-whatsapp.mp4","poster":"couvertures/ep03-qr-code-whatsapp.jpg","duree":24.7}]},{"groupe":"s1","badge":"EP 04","titre":"Réservations → Google Sheets","date":"Mon 12 Oct","mot":"AGENDA","variantes":[{"label":"Hook A","texte":"« Votre agenda est encore dans vos messages Instagram ? »","src":"ep04-reservation-sheets.mp4","poster":"couvertures/ep04-reservation-sheets.jpg","duree":24.7}]},{"groupe":"s1","badge":"EP 05","titre":"Rappel la veille","date":"Wed 14 Oct","mot":"📤 Share","variantes":[{"label":"Hook A","texte":"« Les rendez-vous oubliés vous coûtent combien par mois ? »","src":"ep05-rappel-veille.mp4","poster":"couvertures/ep05-rappel-veille.jpg","duree":24.7}]},{"groupe":"s1","badge":"EP 06","titre":"Créneaux en ligne","date":"Fri 16 Oct","mot":"RDV","variantes":[{"label":"Hook A","texte":"« Vos clients réservent pendant que vous dormez. »","src":"ep06-creneaux-en-ligne.mp4","poster":"couvertures/ep06-creneaux-en-ligne.jpg","duree":24.7}]},{"groupe":"s1","badge":"EP 07","titre":"Devis + alerte instantanée","date":"Mon 19 Oct","mot":"DEVIS","variantes":[{"label":"Hook A","texte":"« Un client demande un devis. Vous répondez 2 jours après. Il est déjà parti. »","src":"ep07-devis-alerte.mp4","poster":"couvertures/ep07-devis-alerte.jpg","duree":25.5}]},{"groupe":"s1","badge":"EP 08","titre":"Relance après 2 jours","date":"Wed 21 Oct","mot":"📌 Save","variantes":[{"label":"Hook A","texte":"« La plupart des ventes se font après la relance. Vous relancez ? »","src":"ep08-relance-auto.mp4","poster":"couvertures/ep08-relance-auto.jpg","duree":25.1}]},{"groupe":"s1","badge":"EP 09","titre":"Tableau des sources","date":"Fri 23 Oct","mot":"CLIENTS","variantes":[{"label":"Hook A","texte":"« Instagram, Google ou bouche-à-oreille : vous savez ce qui marche ? »","src":"ep09-tableau-prospects.mp4","poster":"couvertures/ep09-tableau-prospects.jpg","duree":24.9}]},{"groupe":"s1","badge":"EP 10","titre":"Chatbot IA","date":"Mon 26 Oct","mot":"IA","variantes":[{"label":"Hook A","texte":"« Horaires, prix, adresse : vous répondez encore à la main ? »","src":"ep10-chatbot-ia.mp4","poster":"couvertures/ep10-chatbot-ia.jpg","duree":24.9}]},{"groupe":"s1","badge":"EP 11","titre":"Réponses aux avis par IA","date":"Wed 28 Oct","mot":"📌 Save","variantes":[{"label":"Hook A","texte":"« Un avis négatif sans réponse fait fuir les clients. »","src":"ep11-reponses-avis-ia.mp4","poster":"couvertures/ep11-reponses-avis-ia.jpg","duree":24.7}]},{"groupe":"s1","badge":"EP 12","titre":"Site de salon complet","date":"Fri 30 Oct","mot":"🔗 Link in bio","variantes":[{"label":"Hook A","texte":"« Voici tout ce qu'on a construit ce mois-ci, dans un seul site. »","src":"ep12-site-salon-complet.mp4","poster":"couvertures/ep12-site-salon-complet.jpg","duree":25.1}]},{"groupe":"s2","badge":"EP 13","titre":"Devis personnalisé en 60 secondes","date":"Mon 2 Nov","mot":"PROPOSITION","variantes":[{"label":"Hook A","texte":"« Ce devis s'est écrit tout seul en 60 secondes. »","src":"ep13-devis-ia-60-secondes.mp4","poster":"couvertures/ep13-devis-ia-60-secondes.jpg","duree":24.7},{"label":"Hook B","texte":"« “Je vous envoie le devis ce soir.” Trois jours plus tard, le couple avait signé ailleurs. »","src":"ep13-devis-ia-60-secondes-accroche-B.mp4","poster":"couvertures/ep13-devis-ia-60-secondes-accroche-B.jpg","duree":26.3}]},{"groupe":"s2","badge":"EP 14","titre":"Tri des demandes : chaud, tiède, froid","date":"Wed 4 Nov","mot":"TRI","variantes":[{"label":"Hook A","texte":"« 30 demandes de devis cette semaine. Lesquelles rappeler en premier ? »","src":"ep14-tri-prospects.mp4","poster":"couvertures/ep14-tri-prospects.jpg","duree":24.9},{"label":"Hook B","texte":"« Arrêtez de répondre aux demandes dans l'ordre d'arrivée. »","src":"ep14-tri-prospects-accroche-B.mp4","poster":"couvertures/ep14-tri-prospects-accroche-B.jpg","duree":24.7}]},{"groupe":"s2","badge":"EP 15","titre":"Une photo, une semaine de posts","date":"Fri 6 Nov","mot":"POST","variantes":[{"label":"Hook A","texte":"« Une photo de votre produit. Sept jours de contenu. Deux minutes. »","src":"ep15-photo-semaine-posts.mp4","poster":"couvertures/ep15-photo-semaine-posts.jpg","duree":24.9},{"label":"Hook B","texte":"« Vous ne manquez pas d'idées. Vous manquez de temps pour les écrire. »","src":"ep15-photo-semaine-posts-accroche-B.mp4","poster":"couvertures/ep15-photo-semaine-posts-accroche-B.jpg","duree":25.1}]},{"groupe":"s2","badge":"EP 16","titre":"Les clientes perdues","date":"Mon 9 Nov","mot":"RETOUR","variantes":[{"label":"Hook A","texte":"« 23 clientes ne sont pas revenues depuis 2 mois. Voici le message qui les fait revenir. »","src":"ep16-clients-perdus.mp4","poster":"couvertures/ep16-clients-perdus.jpg","duree":25.9},{"label":"Hook B","texte":"« Elle venait chaque mois. Puis plus rien. Personne ne lui a écrit. »","src":"ep16-clients-perdus-accroche-B.mp4","poster":"couvertures/ep16-clients-perdus-accroche-B.jpg","duree":25.1}]},{"groupe":"s2","badge":"EP 17","titre":"Demande d'avis automatique","date":"Wed 11 Nov","mot":"AVIS","variantes":[{"label":"Hook A","texte":"« Vos clientes adorent votre travail. Pourquoi si peu d'avis Google ? »","src":"ep17-demande-avis-auto.mp4","poster":"couvertures/ep17-demande-avis-auto.jpg","duree":24.9},{"label":"Hook B","texte":"« Ne demandez plus d'avis. Programmez-les. »","src":"ep17-demande-avis-auto-accroche-B.mp4","poster":"couvertures/ep17-demande-avis-auto-accroche-B.jpg","duree":24.7}]},{"groupe":"s2","badge":"EP 18","titre":"Facture automatique","date":"Fri 13 Nov","mot":"FACTURE","variantes":[{"label":"Hook A","texte":"« Une facture propre, numérotée et envoyée en 30 secondes. »","src":"ep18-facture-auto.mp4","poster":"couvertures/ep18-facture-auto.jpg","duree":24.7},{"label":"Hook B","texte":"« Encore une soirée à faire vos factures sur Word ? »","src":"ep18-facture-auto-accroche-B.mp4","poster":"couvertures/ep18-facture-auto-accroche-B.jpg","duree":24.7}]},{"groupe":"s2","badge":"EP 19","titre":"Liste d'attente Black Friday","date":"Mon 16 Nov","mot":"BLACK","variantes":[{"label":"Hook A","texte":"« Black Friday dans 11 jours. Votre liste d'attente est prête ? »","src":"ep19-liste-attente-black-friday.mp4","poster":"couvertures/ep19-liste-attente-black-friday.jpg","duree":24.9},{"label":"Hook B","texte":"« Une promo postée le jour J, c'est déjà trop tard. »","src":"ep19-liste-attente-black-friday-accroche-B.mp4","poster":"couvertures/ep19-liste-attente-black-friday-accroche-B.jpg","duree":24.7}]},{"groupe":"s2","badge":"EP 20","titre":"Catalogue depuis Google Sheets","date":"Wed 18 Nov","mot":"STOCK","variantes":[{"label":"Hook A","texte":"« Je change un chiffre dans Google Sheets… et le site se met à jour. »","src":"ep20-catalogue-google-sheets.mp4","poster":"couvertures/ep20-catalogue-google-sheets.jpg","duree":25.5},{"label":"Hook B","texte":"« “C'est encore disponible ?” La question que vous lisez toute la journée. »","src":"ep20-catalogue-google-sheets-accroche-B.mp4","poster":"couvertures/ep20-catalogue-google-sheets-accroche-B.jpg","duree":25.5}]},{"groupe":"s2","badge":"EP 21","titre":"Prospects entreprises de fin d'année","date":"Fri 20 Nov","mot":"PROSPECT","variantes":[{"label":"Hook A","texte":"« 50 entreprises à contacter pour vos commandes de fin d'année. Trouvées en 5 minutes. »","src":"ep21-prospects-entreprises.mp4","poster":"couvertures/ep21-prospects-entreprises.jpg","duree":25.5},{"label":"Hook B","texte":"« Vous attendez les commandes de fin d'année ? Les autres vont les chercher. »","src":"ep21-prospects-entreprises-accroche-B.mp4","poster":"couvertures/ep21-prospects-entreprises-accroche-B.jpg","duree":25.3}]},{"groupe":"s2","badge":"EP 22","titre":"Agent IA de commande","date":"Mon 23 Nov","mot":"AGENT","variantes":[{"label":"Hook A","texte":"« “2 cappu et un croissant pour 8h30.” L'IA a fait le reste. »","src":"ep22-agent-commandes-ia.mp4","poster":"couvertures/ep22-agent-commandes-ia.jpg","duree":25.5},{"label":"Hook B","texte":"« Un chatbot répond. Un agent agit. Voici la différence. »","src":"ep22-agent-commandes-ia-accroche-B.mp4","poster":"couvertures/ep22-agent-commandes-ia-accroche-B.jpg","duree":24.7}]},{"groupe":"s2","badge":"EP 23","titre":"Rapport du lundi","date":"Wed 25 Nov","mot":"LUNDI","variantes":[{"label":"Hook A","texte":"« Chaque lundi à 8h, ce message arrive tout seul. »","src":"ep23-rapport-du-lundi.mp4","poster":"couvertures/ep23-rapport-du-lundi.jpg","duree":24.7},{"label":"Hook B","texte":"« Vous ne pouvez pas améliorer ce que vous ne mesurez pas. »","src":"ep23-rapport-du-lundi-accroche-B.mp4","poster":"couvertures/ep23-rapport-du-lundi-accroche-B.jpg","duree":24.9}]},{"groupe":"s2","badge":"EP 24","titre":"Diagnostic : vos 5 automatisations","date":"Fri 27 Nov","mot":"🔗 Link in bio","variantes":[{"label":"Hook A","texte":"« Si j'ouvrais un commerce demain, voici les 5 automatisations que je mettrais en place. »","src":"ep24-diagnostic-5-automatisations.mp4","poster":"couvertures/ep24-diagnostic-5-automatisations.jpg","duree":26.5},{"label":"Hook B","texte":"« 24 épisodes en 2 mois. Si vous ne gardez que 5 automatisations, gardez celles-là. »","src":"ep24-diagnostic-5-automatisations-accroche-B.mp4","poster":"couvertures/ep24-diagnostic-5-automatisations-accroche-B.jpg","duree":26.5}]},{"groupe":"recap","badge":"WEEK 1","titre":"Quelle semaine 🤯 · Commandes WhatsApp","date":"Sat 10 Oct","mot":"📌 Save","variantes":[{"label":"Recap","texte":"Le bouton « Commander sur WhatsApp » · La commande complète en un message · Le QR code WhatsApp en vitrine","src":"semaine-1-commandes-whatsapp.mp4","poster":"couvertures/semaine-1-commandes-whatsapp.jpg","duree":24.5}]},{"groupe":"recap","badge":"WEEK 2","titre":"Quelle semaine 🤯 · Réservations","date":"Sat 17 Oct","mot":"📌 Save","variantes":[{"label":"Recap","texte":"Les réservations qui remplissent Google Sheets · Le rappel automatique la veille · Les créneaux en ligne","src":"semaine-2-reservations.mp4","poster":"couvertures/semaine-2-reservations.jpg","duree":24.5}]},{"groupe":"recap","badge":"WEEK 3","titre":"Quelle semaine 🤯 · Prospects et relances","date":"Sat 24 Oct","mot":"📌 Save","variantes":[{"label":"Recap","texte":"Le devis avec alerte instantanée · La relance après 2 jours · D'où viennent vos clients","src":"semaine-3-prospects-relances.mp4","poster":"couvertures/semaine-3-prospects-relances.jpg","duree":24.5}]},{"groupe":"recap","badge":"WEEK 4","titre":"Quelle semaine 🤯 · IA et site complet","date":"Sat 31 Oct","mot":"📌 Save","variantes":[{"label":"Recap","texte":"Le chatbot qui répond aux questions · L'IA qui prépare vos réponses aux avis · Le site complet, de A à Z","src":"semaine-4-ia-site-complet.mp4","poster":"couvertures/semaine-4-ia-site-complet.jpg","duree":24.5}]},{"groupe":"recap","badge":"WEEK 5","titre":"Quelle semaine 🤯 · L'IA au travail","date":"Sat 7 Nov","mot":"📌 Save","variantes":[{"label":"Recap","texte":"Le devis personnalisé en 60 secondes · Le tri des demandes : chaud, tiède, froid · Une photo, une semaine de posts","src":"semaine-5-ia-au-travail.mp4","poster":"couvertures/semaine-5-ia-au-travail.jpg","duree":24.5}]},{"groupe":"recap","badge":"WEEK 6","titre":"Quelle semaine 🤯 · L'argent qui dort dans votre fichier clients","date":"Sat 14 Nov","mot":"📌 Save","variantes":[{"label":"Recap","texte":"Le message aux clientes perdues · La demande d'avis automatique · La facture qui se fait toute seule","src":"semaine-6-fichier-clients.mp4","poster":"couvertures/semaine-6-fichier-clients.jpg","duree":24.5}]},{"groupe":"recap","badge":"WEEK 7","titre":"Quelle semaine 🤯 · Black Friday et fin d'année","date":"Sat 21 Nov","mot":"📌 Save","variantes":[{"label":"Recap","texte":"La liste d'attente Black Friday · Le catalogue depuis Google Sheets · 50 entreprises à contacter","src":"semaine-7-black-friday.mp4","poster":"couvertures/semaine-7-black-friday.jpg","duree":24.5}]},{"groupe":"recap","badge":"WEEK 8","titre":"Quelle semaine 🤯 · Votre employé IA","date":"Sat 28 Nov","mot":"📌 Save","variantes":[{"label":"Recap","texte":"L'agent IA qui prend les commandes · Le rapport du lundi matin · Les 5 automatisations à mettre en place","src":"semaine-8-employe-ia.mp4","poster":"couvertures/semaine-8-employe-ia.jpg","duree":24.5}]},{"groupe":"cards","badge":"INTRO","titre":"Carte d'intro « Automatise ça »","date":"Every video","mot":"1.4 s","variantes":[{"label":"Intro","texte":"To open your own screen recordings in CapCut.","src":"carte-intro.mp4","poster":"couvertures/carte-intro.jpg","duree":1.4}]},{"groupe":"cards","badge":"END","titre":"Carte de fin · lien en bio","date":"Every video","mot":"ClickVente","variantes":[{"label":"End","texte":"Je construis ces automatisations pour votre commerce · Lien en bio · ClickVente","src":"carte-fin.mp4","poster":"couvertures/carte-fin.jpg","duree":4.2}]}];
+  const GROUPES = [["all", "All"], ["s1", "Season 1"], ["s2", "Season 2"], ["recap", "Weekly recaps"], ["cards", "Cards"]];
+  const grid = document.getElementById("grid");
+  const filters = document.getElementById("filters");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const hover = matchMedia("(hover: hover) and (pointer: fine)").matches;
+  let groupe = "all";
+  const fmt = (s) => `0:${String(Math.round(s)).padStart(2, "0")}`;
+
+  function card(it) {
+    const el = document.createElement("article");
+    el.className = "clip";
+    el.innerHTML = '<div class="screen"><video muted playsinline preload="none" controls></video><span class="badge"></span><span class="time"></span></div>' +
+      '<div class="info"><div class="row"><span class="date"></span><span class="kw"></span></div><h2></h2><div class="toggle" role="group" aria-label="Hook version" hidden></div><p class="hook"></p><div class="row"><span class="file"></span><a class="open" target="_blank" rel="noopener">Open ↗</a></div></div>';
+    const video = el.querySelector("video");
+    el.querySelector(".badge").textContent = it.badge;
+    el.querySelector(".date").textContent = it.date;
+    el.querySelector(".kw").textContent = it.mot;
+    el.querySelector("h2").textContent = it.titre;
+    const toggle = el.querySelector(".toggle");
+    const show = (v) => {
+      video.poster = v.poster;
+      video.src = v.src;
+      el.querySelector(".time").textContent = fmt(v.duree);
+      el.querySelector(".hook").textContent = v.texte;
+      el.querySelector(".file").textContent = v.src;
+      el.querySelector(".file").title = v.src;
+      el.querySelector(".open").href = v.src;
+    };
+    if (it.variantes.length > 1) {
+      toggle.hidden = false;
+      it.variantes.forEach((v, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = v.label;
+        b.setAttribute("aria-pressed", String(i === 0));
+        b.onclick = () => { toggle.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); show(v); };
+        toggle.append(b);
+      });
+    }
+    show(it.variantes[0]);
+    if (hover && !reduce) {
+      el.addEventListener("mouseenter", () => { video.muted = true; video.play().catch(() => {}); });
+      el.addEventListener("mouseleave", () => video.pause());
+    }
+    return el;
+  }
+
+  function render() {
+    grid.replaceChildren(...ITEMS.filter((it) => groupe === "all" || it.groupe === groupe).map(card));
+    filters.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.g === groupe)));
+  }
+  GROUPES.forEach(([g, label]) => {
+    const n = g === "all" ? ITEMS.length : ITEMS.filter((it) => it.groupe === g).length;
+    if (!n) return;
+    const b = document.createElement("button");
+    b.type = "button";
+    b.dataset.g = g;
+    b.innerHTML = label + "<span>" + n + "</span>";
+    b.onclick = () => { groupe = g; render(); };
+    filters.append(b);
+  });
+  render();
+</script>

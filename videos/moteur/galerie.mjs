@@ -26,6 +26,8 @@ const THEMES = ["Commandes WhatsApp", "Réservations", "Prospects et relances", 
   "L'argent qui dort dans votre fichier clients", "Black Friday et fin d'année", "Votre employé IA"];
 
 const plain = (s) => s.replace(/\*/g, "");
+// Accroche entre « » ; les guillemets qu'elle contient deviennent “ ” (guillemets imbriqués).
+const citation = (s) => `« ${plain(s).replace(/«\s*/g, "“").replace(/\s*»/g, "”")} »`;
 function fichier(nom) {
   const f = join(OUT, `${nom}.mp4`);
   if (!existsSync(f)) return null;
@@ -43,16 +45,16 @@ const items = [
     groupe: e.num <= 12 ? "s1" : "s2", badge: `EP ${String(e.num).padStart(2, "0")}`, titre: TITRES[e.num - 1], date: DATES[e.num - 1],
     mot: e.cta.type === "keyword" ? e.cta.mot : { save: "📌 Save", share: "📤 Share", bio: "🔗 Link in bio" }[e.cta.type],
     variantes: [
-      { label: "Hook A", accroche: plain(e.accroche), ...fichier(e.nom) },
-      ...(e.accrocheB ? [{ label: "Hook B", accroche: plain(e.accrocheB), ...fichier(`${e.nom}-accroche-B`) }] : []),
+      { label: "Hook A", texte: citation(e.accroche), ...fichier(e.nom) },
+      ...(e.accrocheB ? [{ label: "Hook B", texte: citation(e.accrocheB), ...fichier(`${e.nom}-accroche-B`) }] : []),
     ],
   })),
   ...semaines.map((s, i) => ({
     groupe: "recap", badge: `WEEK ${s.num}`, titre: `Quelle semaine 🤯 · ${THEMES[i]}`, date: SAMEDIS[i], mot: "📌 Save",
-    variantes: [{ label: "Recap", accroche: s.items.map((it) => it.titre).join(" · "), ...fichier(s.nom) }],
+    variantes: [{ label: "Recap", texte: s.items.map((it) => it.titre).join(" · "), ...fichier(s.nom) }],
   })),
-  { groupe: "cards", badge: "INTRO", titre: "Carte d'intro « Automatise ça »", date: "Every video", mot: "1.4 s", variantes: [{ label: "Intro", accroche: "To open your own screen recordings in CapCut.", ...fichier("carte-intro") }] },
-  { groupe: "cards", badge: "END", titre: "Carte de fin · lien en bio", date: "Every video", mot: "ClickVente", variantes: [{ label: "End", accroche: "Je construis ces automatisations pour votre commerce · Lien en bio · ClickVente", ...fichier("carte-fin") }] },
+  { groupe: "cards", badge: "INTRO", titre: "Carte d'intro « Automatise ça »", date: "Every video", mot: "1.4 s", variantes: [{ label: "Intro", texte: "To open your own screen recordings in CapCut.", ...fichier("carte-intro") }] },
+  { groupe: "cards", badge: "END", titre: "Carte de fin · lien en bio", date: "Every video", mot: "ClickVente", variantes: [{ label: "End", texte: "Je construis ces automatisations pour votre commerce · Lien en bio · ClickVente", ...fichier("carte-fin") }] },
 ].map((it) => ({ ...it, variantes: it.variantes.filter((v) => v.src) })).filter((it) => it.variantes.length);
 
 const total = items.reduce((n, it) => n + it.variantes.length, 0);
@@ -95,7 +97,8 @@ const html = `<meta charset="utf-8">
   .badge { left: 8px; } .time { right: 8px; font-variant-numeric: tabular-nums; }
   .info { padding: 12px 12px 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
   .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-width: 0; }
-  .date { font-size: 12px; color: var(--muted); }
+  .info > .row:first-child { flex-wrap: wrap; row-gap: 6px; }
+  .date { font-size: 12px; color: var(--muted); white-space: nowrap; }
   .kw { font: 600 11px var(--mono); letter-spacing: .06em; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
   h2 { font: 600 16px/1.25 var(--body); margin: 0; text-wrap: balance; }
   .hook { margin: 0; font-size: 13px; color: var(--muted); }
@@ -144,7 +147,7 @@ const html = `<meta charset="utf-8">
       video.poster = v.poster;
       video.src = v.src;
       el.querySelector(".time").textContent = fmt(v.duree);
-      el.querySelector(".hook").textContent = "« " + v.accroche + " »";
+      el.querySelector(".hook").textContent = v.texte;
       el.querySelector(".file").textContent = v.src;
       el.querySelector(".file").title = v.src;
       el.querySelector(".open").href = v.src;

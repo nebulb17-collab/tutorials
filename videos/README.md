@@ -54,7 +54,7 @@ node render.mjs ep13 semaine-5   # only those (prefix match)
 node render.mjs                  # all 46 (about 40 minutes on 4 cores; PARALLELE=3 by default)
 ```
 
-Videos land in `videos/out/` (git-ignored: about 120 MB). Then `node galerie.mjs` writes `videos/out/index.html`, a page to watch every video, switch between hook A and hook B, and open each file. To preview the engine live, open `moteur/player.html?demo` in Chrome.
+Videos land in `videos/out/` (git-ignored: about 90 MB). Then `node galerie.mjs` writes `videos/out/index.html`, a page to watch every video, switch between hook A and hook B, and open each file. To preview the engine live, open `moteur/player.html?demo` in Chrome.
 
 - **Text, hooks, steps, keywords:** `storyboards/episodes.mjs` and `storyboards/semaines.mjs`. Wrap words in `*stars*` to colour them.
 - **What animates in the phone:** the `comp` of each episode, one of `chat`, `notif`, `sheet`, `cards`, `doc`, `stats`, `slots`, `qr`, with its data and timings (seconds from the start of the scene).

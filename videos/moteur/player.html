@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Automatise ça — lecteur de motion design</title>
+<!-- Polices et émojis (Twemoji, en images SVG) servis en local depuis node_modules : le rendu ne dépend pas d'Internet. -->
+<link rel="stylesheet" href="node_modules/@fontsource/inter/400.css">
+<link rel="stylesheet" href="node_modules/@fontsource/inter/500.css">
+<link rel="stylesheet" href="node_modules/@fontsource/inter/600.css">
+<link rel="stylesheet" href="node_modules/@fontsource/inter/700.css">
+<link rel="stylesheet" href="node_modules/@fontsource/inter/800.css">
+<link rel="stylesheet" href="node_modules/@fontsource/fraunces/600.css">
+<link rel="stylesheet" href="moteur.css">
+<script src="node_modules/qrcode-generator/qrcode.js"></script>
+</head>
+<body>
+<div id="stage"></div>
+<script src="moteur.js"></script>
+<script>
+  // Aperçu dans un navigateur : player.html?demo lance la vidéo de démonstration en boucle.
+  if (location.search.includes("demo")) {
+    const d = window.DEMO;
+    window.prepare(d).then((duree) => {
+      const t0 = performance.now();
+      const tick = () => { window.seek(((performance.now() - t0) / 1000) % duree); requestAnimationFrame(tick); };
+      tick();
+    });
+  }
+</script>
+</body>
+</html>

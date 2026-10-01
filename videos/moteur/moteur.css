@@ -1,0 +1,218 @@
+/* Moteur de motion design « Automatise ça » — 1080 × 1920, couleurs de la marque. */
+:root {
+  --brand: #CF7652; --brand-dark: #A9583A; --brand-light: #F2B79C;
+  --ink: #2A211C; --ink-2: #3B2E27; --muted: #7A6A60; --cream: #FBF6F1; --soft: #FBEDE6; --line: #EFE4DA;
+  --ok: #1E7A42; --wa: #25D366; --hot: #C2410C; --warm: #E2A23B; --cold: #2F5E8C;
+  --sans: Inter, "DejaVu Sans", sans-serif;
+  --serif: Fraunces, "DejaVu Serif", serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+body { font-family: var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--cream); }
+.scene { position: absolute; inset: 0; overflow: hidden; }
+.abs { position: absolute; }
+
+/* ---------- Animations (toutes pilotées image par image par seek) ---------- */
+@keyframes sceneIn { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: none; } }
+@keyframes sceneOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes slideUpIn { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes up { from { opacity: 0; transform: translateY(46px); } to { opacity: 1; transform: none; } }
+@keyframes upBig { from { opacity: 0; transform: translateY(420px); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes dim { from { opacity: 1; } to { opacity: .42; } }
+@keyframes pop { 0% { opacity: 0; transform: scale(.55); } 70% { opacity: 1; transform: scale(1.06); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes popTilt { 0% { opacity: 0; transform: scale(.4) rotate(-14deg); } 70% { opacity: 1; transform: scale(1.08) rotate(4deg); } 100% { opacity: 1; transform: scale(1) rotate(-4deg); } }
+@keyframes drop { 0% { opacity: 0; transform: translateY(-140px) scale(.96); } 70% { opacity: 1; transform: translateY(10px); } 100% { opacity: 1; transform: none; } }
+@keyframes slideIn { from { opacity: 0; transform: translateX(160px); } to { opacity: 1; transform: none; } }
+@keyframes growX { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes growY { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes pulse { from { transform: scale(1); } to { transform: scale(1.045); } }
+@keyframes drift1 { from { transform: translate(-80px, -40px) scale(1); } to { transform: translate(90px, 70px) scale(1.18); } }
+@keyframes drift2 { from { transform: translate(60px, 50px) scale(1.1); } to { transform: translate(-70px, -60px) scale(.92); } }
+@keyframes circleGrow { from { clip-path: circle(0% at 50% 50%); } to { clip-path: circle(75% at 50% 50%); } }
+@keyframes wipeUp { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 0 100% 0); } }
+@keyframes reveal { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes scan { 0% { transform: translateY(0); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(330px); opacity: 0; } }
+@keyframes flash { 0% { background: #FCE8B2; } 100% { background: transparent; } }
+@keyframes cellFlash { 0% { background: #FCE8B2; transform: scale(1.25); } 100% { background: #FCE8B2; transform: scale(1); } }
+@keyframes select { from { background: #fff; color: var(--ink); } to { background: var(--ink); color: #fff; } }
+@keyframes underline { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes dots { 0%, 100% { opacity: .25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-6px); } }
+@keyframes tap { 0% { opacity: 0; transform: scale(.4); } 30% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.6); } }
+
+/* ---------- Habillage commun ---------- */
+/* Halo doux en dégradé radial (bien plus rapide à dessiner qu'un flou). */
+.blob { position: absolute; border-radius: 50%; opacity: .6; }
+.pill { display: inline-block; border-radius: 999px; padding: 14px 30px; font: 700 30px var(--sans); letter-spacing: 1px; }
+.w { display: inline-block; white-space: pre; }
+/* Émojis Twemoji : une image à la taille du texte qui l'entoure. */
+.emo { display: inline-block; width: 1.05em; height: 1.05em; vertical-align: -0.16em; margin: 0 0.04em; }
+.em { color: var(--brand); position: relative; }
+.on-dark .em { color: var(--brand-light); }
+
+/* Générique « Automatise ça » */
+.intro-disc { position: absolute; inset: 0; background: var(--brand); }
+.intro-logo { position: absolute; left: 0; right: 0; top: 760px; text-align: center; color: #fff; }
+.intro-logo .kicker { font: 700 34px var(--sans); letter-spacing: 8px; opacity: .9; }
+.intro-logo .name { font: 600 150px/1 var(--serif); letter-spacing: -3px; margin-top: 18px; }
+.intro-logo .ep { display: inline-block; margin-top: 34px; background: #fff; color: var(--brand-dark); border-radius: 999px; padding: 14px 34px; font: 800 34px var(--sans); letter-spacing: 3px; }
+
+/* Accroche */
+.hook { position: absolute; left: 90px; right: 90px; top: 640px; font: 600 98px/1.06 var(--serif); letter-spacing: -1.5px; color: #fff; }
+.hook.long { font-size: 84px; }
+.sticker { position: absolute; left: 90px; top: 470px; background: var(--cream); color: var(--brand-dark); border-radius: 22px; padding: 18px 30px; font: 800 38px var(--sans); transform-origin: left center; }
+.hook-sub { position: absolute; left: 90px; right: 90px; top: 1380px; font: 500 40px/1.35 var(--sans); color: #E9DCD3; }
+
+/* Résultat */
+.label { position: absolute; left: 90px; top: 232px; background: var(--ink); color: #fff; border-radius: 999px; padding: 12px 26px; font: 800 26px var(--sans); letter-spacing: 3px; }
+.result-title { position: absolute; left: 90px; right: 90px; top: 304px; font: 600 54px/1.1 var(--serif); letter-spacing: -.5px; }
+.badge-free { position: absolute; right: 40px; top: 600px; background: var(--ok); color: #fff; border-radius: 26px; padding: 18px 26px; font: 800 32px/1.15 var(--sans); text-align: center; z-index: 5; box-shadow: 0 18px 40px -16px #0006; }
+/* Le téléphone est agrandi (×1,42) et sort par le bas du cadre : le texte reste lisible sur un vrai écran. */
+.phone-wrap { position: absolute; left: 260px; top: 560px; width: 560px; height: 1090px; transform: scale(1.42); transform-origin: top center; }
+.phone { width: 560px; height: 1090px; border-radius: 76px; background: #17110E; padding: 18px; box-shadow: 0 60px 90px -40px #3b1d1080; }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 60px; overflow: hidden; background: #fff; }
+
+/* Étapes */
+.steps-title { position: absolute; left: 90px; right: 90px; top: 300px; font: 600 78px/1.05 var(--serif); color: #fff; letter-spacing: -1px; }
+.step { position: absolute; left: 90px; right: 80px; display: flex; gap: 34px; align-items: center; }
+.step .num { width: 108px; height: 108px; border-radius: 50%; background: var(--cream); color: var(--brand-dark); display: grid; place-items: center; font: 800 52px var(--sans); flex-shrink: 0; }
+.step .txt { font: 700 50px/1.18 var(--sans); color: #fff; }
+.rail { position: absolute; left: 143px; width: 4px; background: #ffffff55; transform-origin: top; }
+
+/* Appel à l'action : une colonne qui se place toute seule (aucun chevauchement, quelle que soit la longueur). */
+.cta-col { position: absolute; left: 90px; right: 90px; top: 500px; display: flex; flex-direction: column; align-items: center; gap: 34px; text-align: center; }
+.cta-top { font: 600 64px var(--serif); color: #fff; }
+.cta-chip span { display: inline-block; background: var(--brand); color: #fff; border-radius: 40px; padding: 34px 64px; font: 800 132px/1 var(--sans); letter-spacing: 4px; white-space: nowrap; box-shadow: 0 30px 60px -24px #CF765299; }
+.cta-chip.text span { font-size: 62px; letter-spacing: 0; padding: 36px 50px; line-height: 1.15; white-space: normal; text-align: center; }
+.cta-suite { font: 600 48px/1.25 var(--sans); color: #fff; }
+.cta-follow { font: 600 38px/1.35 var(--sans); color: #E9DCD3; margin-top: 30px; padding: 0 20px; }
+.cta-support { font: 500 31px/1.45 var(--sans); color: #B9A79B; padding: 0 40px; }
+.cta-brand { font: 700 30px var(--sans); color: var(--brand-light); letter-spacing: 3px; }
+
+/* Récap de la semaine */
+.week-title { position: absolute; left: 90px; right: 60px; top: 420px; font: 600 104px/1 var(--serif); color: #fff; letter-spacing: -2px; white-space: nowrap; }
+.week-sub { position: absolute; left: 90px; right: 90px; top: 600px; font: 600 46px/1.25 var(--sans); color: #E9DCD3; }
+.week-line { position: absolute; left: 90px; right: 90px; font: 700 48px/1.2 var(--sans); color: #fff; display: flex; gap: 22px; }
+.week-line b { color: var(--brand-light); }
+.week-all { position: absolute; left: 90px; right: 90px; top: 1290px; font: 700 50px/1.25 var(--sans); color: var(--brand-light); }
+.item-n { position: absolute; left: 90px; top: 300px; font: 600 210px/1 var(--serif); color: var(--brand); letter-spacing: -6px; }
+.item-ep { position: absolute; left: 96px; top: 540px; font: 800 30px var(--sans); letter-spacing: 3px; color: var(--muted); text-transform: uppercase; }
+.item-title { position: absolute; left: 90px; right: 90px; top: 600px; font: 600 86px/1.04 var(--serif); letter-spacing: -1.5px; }
+.item-line { position: absolute; left: 90px; right: 90px; top: 960px; font: 500 46px/1.35 var(--sans); color: var(--ink-2); }
+.item-icon { position: absolute; right: 90px; top: 290px; width: 230px; height: 230px; border-radius: 50%; background: var(--soft); display: grid; place-items: center; font-size: 120px; }
+.item-kw { position: absolute; left: 90px; top: 1150px; background: var(--ink); color: #fff; border-radius: 999px; padding: 20px 36px; font: 700 40px var(--sans); }
+.item-kw b { color: var(--brand-light); }
+
+/* ---------- Composants dans l'écran du téléphone (524 × 1054) ---------- */
+/* Discussion WhatsApp */
+.chat { position: absolute; inset: 0; background: #ECE5DD; }
+.chat-head { position: absolute; left: 0; right: 0; top: 0; height: 150px; background: #075E54; color: #fff; display: flex; align-items: flex-end; gap: 16px; padding: 0 26px 22px; }
+.chat-head .av { width: 66px; height: 66px; border-radius: 50%; background: var(--brand); display: grid; place-items: center; font: 600 32px var(--serif); flex-shrink: 0; }
+.chat-head b { display: block; font: 700 28px var(--sans); }
+.chat-head small { font: 500 21px var(--sans); opacity: .85; }
+.chat-body { position: absolute; left: 0; right: 0; top: 150px; bottom: 0; padding: 26px 22px; display: flex; flex-direction: column; gap: 16px; }
+.bubble { max-width: 400px; padding: 16px 20px; border-radius: 22px; font: 500 26px/1.38 var(--sans); white-space: pre-wrap; box-shadow: 0 2px 2px #0000000f; transform-origin: bottom left; }
+.bubble.in { align-self: flex-start; background: #fff; border-top-left-radius: 6px; }
+.bubble.out { align-self: flex-end; background: #D9FDD3; border-top-right-radius: 6px; transform-origin: bottom right; }
+.bubble.sys { align-self: center; background: #FFF3C4; color: #5c4a1c; font: 700 22px var(--sans); border-radius: 14px; padding: 10px 18px; }
+.bubble.ok { align-self: center; background: #E6F4EA; color: var(--ok); font: 800 24px var(--sans); border-radius: 999px; padding: 12px 22px; }
+.typing { align-self: flex-start; background: #fff; border-radius: 22px; padding: 18px 22px; display: flex; gap: 8px; }
+.typing i { width: 12px; height: 12px; border-radius: 50%; background: #9c8f86; display: block; }
+
+/* Écran verrouillé + notifications */
+.lock { position: absolute; inset: 0; background: radial-gradient(circle at 70% 18%, #CF765266, transparent 45%), linear-gradient(180deg, #4b3a33, #1b1512); color: #fff; }
+.lock .clock { position: absolute; left: 0; right: 0; top: 120px; text-align: center; font: 300 150px/1 var(--sans); letter-spacing: -4px; }
+.lock .date { position: absolute; left: 0; right: 0; top: 290px; text-align: center; font: 500 28px var(--sans); opacity: .85; }
+.notif { position: absolute; left: 22px; right: 22px; background: #ffffffee; color: var(--ink); border-radius: 34px; padding: 22px 24px; }
+.notif .app { display: flex; justify-content: space-between; font: 600 21px var(--sans); color: var(--muted); margin-bottom: 8px; }
+.notif b { display: block; font: 700 27px/1.25 var(--sans); }
+.notif p { font: 500 25px/1.35 var(--sans); margin-top: 4px; }
+
+/* Tableau Google Sheets */
+.sheet { position: absolute; inset: 0; background: #fff; }
+.sheet-head { height: 150px; background: #E6F4EA; color: #188038; display: flex; align-items: flex-end; gap: 14px; padding: 0 24px 24px; font: 700 26px var(--sans); }
+.sheet-head i { width: 34px; height: 42px; border-radius: 6px; background: #188038; display: block; flex-shrink: 0; }
+.sheet table { width: 100%; border-collapse: collapse; font: 500 23px var(--sans); }
+.sheet th { background: #F8F9FA; color: #5F6368; font-weight: 600; text-align: left; padding: 14px 12px; border: 1px solid #E3E3E3; }
+.sheet td { padding: 18px 12px; border: 1px solid #E3E3E3; white-space: nowrap; }
+.sheet td span { display: inline-block; border-radius: 6px; padding: 0 6px; }
+/* Tout ce qui « arrive en bas » reste dans la partie visible du téléphone (il sort du cadre plus bas). */
+.toast { position: absolute; left: 22px; right: 22px; top: 470px; background: var(--ink); color: #fff; border-radius: 26px; padding: 22px 24px; font: 700 26px/1.3 var(--sans); }
+
+/* Liste de cartes */
+.cards { position: absolute; inset: 0; background: var(--cream); padding: 140px 20px 20px; }
+.cards-head { font: 600 36px/1.15 var(--serif); margin: 0 6px 22px; }
+.card { display: flex; align-items: center; gap: 16px; background: #fff; border: 2px solid var(--line); border-radius: 26px; padding: 14px 16px; margin-bottom: 12px; position: relative; }
+.card .ic { width: 64px; height: 64px; border-radius: 50%; background: var(--soft); display: grid; place-items: center; font: 800 30px var(--sans); flex-shrink: 0; }
+.card .ic.score { background: conic-gradient(var(--c) calc(var(--p) * 1%), var(--line) 0); position: relative; }
+.card .ic.score::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: #fff; }
+.card .ic.score span { position: relative; font-size: 26px; }
+.card .tx { flex: 1; min-width: 0; }
+.card .tx b { display: block; font: 700 26px/1.2 var(--sans); }
+.card .tx small { display: block; font: 500 21px/1.3 var(--sans); color: var(--muted); margin-top: 3px; }
+.card .chip { font: 800 20px var(--sans); border-radius: 999px; padding: 8px 14px; white-space: nowrap; background: var(--soft); color: var(--brand-dark); }
+.card .chip.ok { background: #E6F4EA; color: var(--ok); }
+.card .chip.hot { background: #FFEDD5; color: var(--hot); } .card .chip.warm { background: #FEF3C7; color: #A16207; } .card .chip.cold { background: #E3ECF6; color: var(--cold); }
+.card .chip.alt { position: absolute; right: 18px; }
+.cards-foot { position: relative; margin-top: 16px; background: var(--ink); color: #fff; border-radius: 26px; padding: 22px 24px; font: 700 28px/1.3 var(--sans); }
+.cards-foot b { color: var(--brand-light); font-size: 34px; }
+
+/* Document : devis, facture */
+.doc { position: absolute; inset: 0; background: #EDE3DA; padding: 130px 26px 26px; }
+.paper { background: #fff; border-radius: 10px; padding: 28px 28px 30px; box-shadow: 0 20px 40px -24px #6b3a2470; position: relative; }
+.paper .brand { font: 600 34px var(--serif); border-bottom: 3px solid var(--brand); padding-bottom: 14px; display: flex; justify-content: space-between; align-items: baseline; }
+.paper .brand span { color: var(--brand); }
+.paper .brand small { font: 600 18px var(--sans); color: var(--muted); }
+.paper h4 { font: 600 30px/1.2 var(--serif); margin: 22px 0 18px; }
+.paper .ln { display: flex; justify-content: space-between; gap: 12px; font: 500 23px var(--sans); padding: 14px 0; border-bottom: 1px solid var(--line); }
+.paper .ln b { white-space: nowrap; }
+.paper .tot { display: flex; justify-content: space-between; font: 800 32px var(--sans); padding-top: 20px; }
+.paper .sub { display: flex; justify-content: space-between; font: 500 22px var(--sans); color: var(--muted); padding-top: 8px; }
+.paper .txtline { height: 14px; border-radius: 7px; background: #EEE6DE; margin: 12px 0; transform-origin: left; }
+.stamp { position: relative; display: inline-block; margin-top: 22px; border: 5px solid var(--ok); color: var(--ok); border-radius: 18px; padding: 10px 18px; font: 900 30px var(--sans); transform: rotate(-6deg); }
+
+/* Tableau de bord */
+.stats { position: absolute; inset: 0; background: var(--cream); padding: 150px 24px 24px; }
+.stats-title { font: 600 38px/1.15 var(--serif); margin: 0 4px 22px; }
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.kpi { background: #fff; border: 2px solid var(--line); border-radius: 24px; padding: 18px; }
+.kpi small { display: block; font: 600 20px var(--sans); color: var(--muted); }
+.kpi b { display: block; font: 800 42px/1.15 var(--sans); letter-spacing: -1px; margin-top: 6px; white-space: nowrap; }
+.kpi i { display: block; font: 800 20px var(--sans); font-style: normal; margin-top: 4px; color: var(--ok); }
+.kpi i.bad { color: #B3261E; }
+.bars { margin-top: 26px; display: grid; gap: 14px; }
+.bar { display: grid; grid-template-columns: 196px 1fr; align-items: center; gap: 12px; font: 600 21px var(--sans); }
+.bar .tr { height: 34px; display: flex; align-items: center; gap: 10px; }
+.bar .fill { height: 34px; background: var(--brand); border-radius: 0 8px 8px 0; transform-origin: left; }
+.bar .v { font: 800 22px var(--sans); }
+.note { margin-top: 26px; background: var(--ink); color: #fff; border-radius: 24px; padding: 20px 22px; font: 700 25px/1.35 var(--sans); }
+
+/* Créneaux */
+.slots { position: absolute; inset: 0; background: var(--cream); padding: 120px 24px 24px; }
+.slots .topclock { position: absolute; top: 40px; left: 0; right: 0; text-align: center; font: 700 26px var(--sans); color: var(--ink); }
+.slots h5 { font: 600 38px var(--serif); margin: 22px 6px 8px; }
+.slots .sub { font: 600 22px var(--sans); color: var(--muted); margin: 0 6px 20px; }
+.days { display: flex; gap: 10px; margin-bottom: 26px; }
+.day { flex: 1; border: 2px solid var(--line); background: #fff; border-radius: 18px; padding: 12px 0; text-align: center; font: 600 18px var(--sans); color: var(--muted); }
+.day b { display: block; font: 800 30px var(--sans); color: var(--ink); }
+.day.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+.day.on b { color: #fff; }
+.slot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.slot { border: 2px solid var(--line); background: #fff; border-radius: 16px; padding: 22px 0; text-align: center; font: 800 28px var(--sans); }
+.confirm { position: absolute; left: 16px; right: 16px; top: 470px; background: #fff; border-radius: 40px; padding: 34px 30px 40px; text-align: center; box-shadow: 0 -20px 50px -20px #0005; }
+.confirm .ck { width: 96px; height: 96px; border-radius: 50%; background: var(--ok); color: #fff; display: grid; place-items: center; font: 800 54px var(--sans); margin: 0 auto 16px; }
+.confirm b { display: block; font: 600 38px var(--serif); }
+.confirm p { font: 500 24px/1.4 var(--sans); color: var(--muted); margin-top: 8px; white-space: pre-line; }
+.tapdot { position: absolute; width: 90px; height: 90px; border-radius: 50%; background: #2A211C55; }
+
+/* QR code */
+.qrbox { position: absolute; inset: 0; background: var(--cream); padding: 150px 34px 34px; text-align: center; }
+.qrbox b { display: block; font: 600 40px var(--serif); }
+.qrbox small { display: block; font: 500 24px var(--sans); color: var(--muted); margin: 8px 0 30px; }
+.qr { position: relative; width: 380px; height: 380px; margin: 0 auto; background: #fff; border-radius: 26px; padding: 26px; box-shadow: 0 20px 40px -24px #6b3a2470; }
+.qr svg { width: 100%; height: 100%; display: block; }
+.scanline { position: absolute; left: 14px; right: 14px; top: 26px; height: 6px; border-radius: 3px; background: var(--brand); box-shadow: 0 0 24px var(--brand); }
+.qrbox .wa-pop { position: absolute; left: 30px; right: 30px; top: 470px; background: #D9FDD3; border-radius: 26px; padding: 22px; text-align: left; font: 500 25px/1.4 var(--sans); }
+.qrbox .wa-pop i { display: block; font: 800 20px var(--sans); color: #128C7E; font-style: normal; margin-bottom: 6px; }

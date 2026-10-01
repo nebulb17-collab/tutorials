@@ -84,6 +84,8 @@ The workflow from the October plan stays the same (build, proof shot, `/brag-sli
 
 Batch suggestion: Sun 1 Nov (episodes 13–16), Sun 8 Nov (17–20), Sun 15 Nov (21–24).
 
+**Ready-made motion videos.** [`../videos/`](../videos/) has a motion video for every episode (hook A and hook B for episodes 13–24) and a « Quelle semaine 🤯 » recap for every week, a format inspired by [@drcintas](https://www.instagram.com/drcintas/)'s « What a crazy week in AI » roundups. Post the recap on Saturday: it gives the week's 3 keywords a second chance and is the most saveable video of the week. Add a trending sound in the app; the videos are silent on purpose.
+
 ## CTAs and DM replies
 
 The October rules still apply: reply to every keyword comment yourself within a few hours. New keywords: PROPOSITION, TRI, POST, RETOUR, AVIS, FACTURE, BLACK, STOCK, PROSPECT, AGENT, LUNDI.

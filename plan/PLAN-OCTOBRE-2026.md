@@ -64,7 +64,7 @@ Each episode takes about 1 to 2 hours: build the mini project, turn it into a mo
 
 1. Build the mini project with Claude, using the build prompt below with that episode's details. *(Done for all 12 episodes — see `episodes/`.)*
 2. Record a short screen capture of the result working (the WhatsApp message arriving, the sheet filling). This is your proof shot.
-3. Run /brag-slim in the project folder with the tone prompt below, to get the motion video, music and share copy.
+3. Run /brag-slim in the project folder with the tone prompt below, to get the motion video, music and share copy. *(Or use the ready-made motion video for the episode in [`../videos/`](../videos/), rendered from code with the same brand.)*
 4. Assemble in CapCut or a similar editor: intro card « Automatise ça », hook, the /brag video, your screen capture, CTA card.
 5. Add French subtitles, export in 9:16 and schedule the post.
 

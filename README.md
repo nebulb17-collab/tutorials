@@ -5,6 +5,7 @@ A French short-video series: automations a small business can use today, posted 
 This repo holds the content plans and one working demo per episode, ready to screen-record and to run through `/brag-slim`.
 
 - **The plans:** [`plan/PLAN-OCTOBRE-2026.md`](plan/PLAN-OCTOBRE-2026.md) covers strategy, the calendar, the production workflow, CTAs, DM replies and the weekly check. [`plan/PLAN-NOVEMBRE-2026.md`](plan/PLAN-NOVEMBRE-2026.md) adds season 2: what we take from @nick_saraev, two hooks per episode to A/B test, and the Black Friday week.
+- **The motion videos:** [`videos/`](videos/), 46 vertical videos generated from code (one per episode, hook B versions for season 2, and « Quelle semaine 🤯 » weekly recaps inspired by [@drcintas](https://www.instagram.com/drcintas/)), with the engine to re-render or edit them.
 - **The demos:** [`episodes/`](episodes/), one folder per episode. Each has an `index.html` (one file, mobile-first, French, brand colour `#CF7652`, with the on-screen steps at the bottom) and a `README.md` with the hook, the proof shot to record, how to make it real, and a draft caption with hashtags.
 
 ## Season 1 · October
@@ -70,4 +71,6 @@ episodes/NN-…/index.html    the demo page (one file)
 episodes/NN-…/README.md     hook, steps, proof shot, setup, caption
 episodes/NN-…/*.gs          Google Apps Script backends (episodes 4, 5, 7, 8, 14, 16–21, 23)
 outils/ia-worker/           Cloudflare Worker calling the Claude API (episodes 10–13, 15, 22)
+videos/storyboards/         text and animation data for the 46 motion videos
+videos/moteur/              motion-design engine: render.mjs (MP4s) and galerie.mjs (preview page)
 ```
